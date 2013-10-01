@@ -1,12 +1,17 @@
+*.swp
 /.bash_logout
 /.bash_profile
 /.bashrc
 /.emacs
+/.gitconfig
 /.kshrc
 /.screenrc
 /.viminfo
 /.vimrc
 /.zshrc
 /addon/
+/logs/
 /makofw/
+/www/dev/
+/www/prod/
 

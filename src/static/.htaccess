@@ -1,0 +1,11 @@
+# Use some aggressive client-side caching.
+# Results in *significant* speed increases for page elements that are used
+# repeatedly.  The elements are totally cached, and no requests are made, not
+# even to check if the item has been modified.  This means that you need
+# to use a new filename to push new content to clients -- you can't just edit
+# the file on the server because the clients won't request the new version.
+<IfModule mod_headers.c>
+    Header unset ETag
+    Header unset Last-Modified
+    Header set Expires "Fri, 04 Nov 2021 21:59:49 GMT"
+</IfModule>
