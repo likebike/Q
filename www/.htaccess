@@ -3,8 +3,8 @@
 # site from Nginx, then just tell Nginx to serve directly from the 'www/dev' and/or 'www/prod' directories rather than
 # the 'www' root.
 
-# Disable directory listings:
-Options -Indexes
+# # Disable directory listings:
+# Options -Indexes
 
 RewriteEngine on
 RewriteBase /

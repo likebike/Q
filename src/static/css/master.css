@@ -1,0 +1,7 @@
+pre.code {
+    padding: .5em;
+    background-color: #ddd;
+}
+span.mono {
+    font-family: monospace;
+}

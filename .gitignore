@@ -12,6 +12,9 @@
 /addon/
 /logs/
 /makofw/
+/sebfaction/
+/tmp/
+/www/bigfiles/
 /www/dev/
 /www/prod/
 
