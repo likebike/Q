@@ -28,7 +28,7 @@ chmod 755 Q.cgi
   </li>
 
   <li>
-    <p>Edit your <span class=mono>~/webapps/APP/.htaccess</span> file and add these lines to the top of the file:</p>
+    <p>Edit your <span class=mono>~/webapps/APP/.htaccess</span> file and add these lines to the top of the file.  Remember to replace both instances of <span class=mono>Q.cgi</span> with the actual file you downloaded:</p>
 <pre class=code>
 &lt;FilesMatch ^Q.cgi$&gt;
     SetHandler cgi-script
@@ -38,7 +38,7 @@ Action php-q /Q.cgi
     SetHandler php-q
 &lt;/FilesMatch&gt;
 </pre>
-    <p>Remember to replace both instances of <span class=mono>Q.cgi</span> with the actual file you downloaded.  Once you save these changes, your site will be running from Q!</p>
+    <p>That's it!  Once you save these changes, your site will be running from Q!</p>
   </li>
 </ol>
 <h1>Frequently Asked Questions</h1>
