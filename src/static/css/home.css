@@ -1,0 +1,16 @@
+
+table.downloads th.cornerLabel {
+    color: #ddd;
+    background-color: #444;
+    font-size: 127%;
+}
+table.downloads th.topLabel,
+table.downloads th.leftLabel {
+    background-color: #d8d8d8;
+}
+table.downloads th.leftLabel span.labelDesc {
+    font-size: 85%;
+}
+table.downloads td {
+    text-align: center;
+}

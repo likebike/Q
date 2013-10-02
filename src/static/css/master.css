@@ -1,7 +1,30 @@
+body {
+    width:90%;
+    margin-left: 5%;
+    min-width: 500px;
+}
+
+div#header {
+    margin-top: 3em;
+    position: relative;
+}
+
+a#logo {
+    font-size: 262%;
+}
+span#slogan {
+    font-size: 162%;
+}
+
 pre.code {
     padding: .5em;
     background-color: #ddd;
 }
+
 span.mono {
     font-family: monospace;
+}
+
+h1 {
+    margin-top: 2em;
 }

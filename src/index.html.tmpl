@@ -2,35 +2,67 @@
 
 <h1>What is Q?</h1>
 <p>Q is a process queue specifically designed for running CGI and PHP at <a href="http://webfaction.com/">WebFaction</a>.</p>
-<p>Normally, CGI and PHP at WebFaction are great, except for one problem: there is no limit to the number of CGI workers that get created.  So during a traffic spike, it is easy to exceed your account's RAM limits, resulting in all your processes getting killed.  FastCGI is often recommended as an alternative because it allows you to specify the number of worker processes that should be created, but many sites are not totally compatible with FastCGI, and they produce mysterious "500" errors that can cause the site to "hang".</p>
-<p>Q fixes this problem by only allowing a defined number of CGI workers to run at any time.  Any additional requests that come in get queued and execute in FIFO order.  This enables you to easily control the maximum amount of RAM you use during traffic spikes.  This solution makes CGI a viable option again.</p>
-<p>Q is developed by <a href="mailto:csebastian3@gmail.com">Christopher Sebastian</a> and <a href="mailto:rsanden@gmail.com">Ryan Sanden</a> (both of whom work at WebFaction).</p>
+<p>Normally, CGI and PHP at WebFaction are great, except for one problem: there is no limit to the number of CGI workers that can get created.  So during a traffic spike, it is easy to exceed your account's RAM limits, resulting in all your processes getting killed.  FastCGI is often recommended as an alternative because it allows you to specify the number of worker processes that should be created, but many sites are not totally compatible with FastCGI, and they produce mysterious "500" errors that can cause the site to stop responding.</p>
+<p>Q fixes this problem by only allowing a defined number of CGI workers to run concurrently.  Any additional requests that come in get queued and execute in FIFO order.  This enables you to easily control the maximum amount of RAM you use during traffic spikes.  This solution makes CGI a viable option again.</p>
+<p>Q is developed by <a href="mailto:csebastian3@gmail.com">Christopher Sebastian</a> and <a href="mailto:rsanden@gmail.com">Ryan Sanden</a> (both of whom work at WebFaction).  Feel free to ask us questions and send feedback.</p>
 <h1>Installation</h1>
-<p>Installation consists of two pieces: downloading a Q binary, and then using the binary from your website's .htaccess file.</p>
+<p>Installation consists of two pieces: downloading a Q binary, and then referencing the binary from your website's .htaccess file.</p>
 <ol>
   <li>
-    <p>Download an appropriate binary from the table below and place it at <span class=mono>~/webapps/APP/</span> (where <span class=mono>APP</span> is your app name):</p>
+    <p>In all of the below instructions, make the following name substitutaions:</p>
+    <ul>
+      <li><span class=mono>APP</span> = Your Application Name, defined in the WebFaction Control Panel, and corresponding to a folder under <span class=mono>~/webapps/</span>.</li>
+      <li><span class=mono>Q.cgi</span> = The actual filename that you download from the table below (probably <span class=mono>php54_normal.cgi</span>).</li>
+    </ul>
+    <p>Download an appropriate binary, give it a proper set of permissions, and place it at <span class=mono>~/webapps/APP/</span>.  You can do this from the command line like this:</p>
+<pre class=code>
+cd ~/webapps/APP/
+curl -O http://q.likebike.org/bin/centos6/Q.cgi    ${'#'}${'#'}# Replace this URL with the appropriate one from the table below.
+chmod 755 Q.cgi
+</pre>
+
     <h3>If your account is on a CentOS 6 server (Web300 or higher):</h3>
     ${self.DL_TABLE('CentOS 6', '/bin/centos6')}
     <h3>If your account is on a CentOS 5 server (Web299 or lower):</h3>
     ${self.DL_TABLE('CentOS 5', '/bin/centos5')}
   </li>
 
-
   <li>
-    <p>Edit your <span class=mono>~/webapps/APP/.htaccess</span> file and add these lines to the top of the file (replace <span class=mono>php54_normal.cgi</span> with the filename you downloaded):</p>
+    <p>Edit your <span class=mono>~/webapps/APP/.htaccess</span> file and add these lines to the top of the file:</p>
 <pre class=code>
-Action php-q /php54_normal.cgi
-AddHandler php-q .php
+&lt;FilesMatch ^Q.cgi$&gt;
+    SetHandler cgi-script
+&lt;/FilesMatch&gt;
+Action php-q /Q.cgi
+&lt;FilesMatch \.php$&gt;
+    SetHandler php-q
+&lt;/FilesMatch&gt;
 </pre>
+    <p>Remember to replace both instances of <span class=mono>Q.cgi</span> with the actual file you downloaded.  Once you save these changes, your site will be running from Q!</p>
   </li>
 </ol>
 <h1>Frequently Asked Questions</h1>
 <p>If you have a question that is not addressed here, please send it to <a href="mailto:csebastian3@gmail.com">Christopher</a>.</p>
 <ul>
-  <li>Which PHP version am I running?</li>
-  <li>What is the difference between the "normal" and "large" binaries?</li>
-  <li>I am using Q, but I forgot which one I downloaded.  How can I see which Q settings I am currently using?</li>
+  <li>
+    <h3>Which PHP version am I running?</h3>
+    <p>Create an <span class=mono>info.php</span> file in your web app with the following contents:</p>
+<pre class=code>
+&lt;?php phpinfo(); ?&gt;
+</pre>
+    <p>When you visit that page, the PHP version will be printed at the top of the screen.  Remember to delete the info.php file when you are done with it so other people can't see your settings!</p>
+  </li>
+  <li>
+    <h3>What is the difference between the "normal" and "large" binaries?</h3>
+    <p>They are configured to run different numbers of concurrent processes.  The "normal" settings are appropriate for basic WebFaction accounts, and the "large" settings are better for accounts with more RAM.</p>
+  </li>
+  <li>
+    <h3>I am using Q, but I forgot which one I downloaded.  How can I see which Q settings I am currently using?</h3>
+    <p>Run your Q binary with the <span class=mono>HELP=1</span> environment defined, as shown below.  The resulting help message will list your settings.</p>
+<pre class=code>
+HELP=1 ./Q.cgi
+</pre>
+  </li>
 </ul>
 <h1>How Q Works</h1>
 <p>Note that the majority of Q's internal options are hard-coded when you select a PHP binary from the table above, so you actually never need to specify these options unless you are in an advanced situation.</p>
@@ -39,7 +71,7 @@ AddHandler php-q .php
 
 Q Version 2013-08-28e  --  a FIFO worker queue, capable of running multiple workers at once.
 
-Typical usage:  COMMAND=/usr/bin/rsync  LOCKFILE='~/.tmp/backups.lock' ./q [args...]
+Typical usage:  COMMAND=/usr/bin/rsync  LOCKFILE='~/.tmp/backups.lock' ./Q [args...]
 
 The args get passed directly to COMMAND.
 
@@ -64,9 +96,12 @@ This enables you to achieve some interesting queuing structures:
 </pre>
 
 <%def name="DL_TABLE(title, basePath)">
-    <table>
+    <table class=downloads>
       <tr><th class=cornerLabel>${title}</td><th class=topLabel>PHP 5.2</th><th class=topLabel>PHP 5.3</th><th class=topLabel>PHP 5.4</th><th class=topLabel>CGI (Advanced)</th></tr>
-      <tr><th class=leftLabel>Normal Account<br><span class=labelDesc>(If you have a 256MB/512MB plan)</span></td><td><a href="${basePath}/php52_normal.cgi">php52_normal.cgi</a></td><td><a href="${basePath}/php53_normal.cgi">php53_normal.cgi</a></td><td><a href="${basePath}/php54_normal.cgi">php54_normal.cgi</a></td><td rowspan=2><a href="${basePath}/q">q</a></td></tr>
+      <tr><th class=leftLabel>Normal Account<br><span class=labelDesc>(If you have a 256MB/512MB plan)</span></td><td><a href="${basePath}/php52_normal.cgi">php52_normal.cgi</a></td><td><a href="${basePath}/php53_normal.cgi">php53_normal.cgi</a></td><td><a href="${basePath}/php54_normal.cgi">php54_normal.cgi</a></td><td rowspan=2><a href="${basePath}/Q">Q</a></td></tr>
       <tr><th class=leftLabel>Large Account<br><span class=labelDesc>(If you have a 1GB/2GB/4GB plan)</span></td><td><a href="${basePath}/php52_large.cgi">php52_large.cgi</a></td><td><a href="${basePath}/php53_large.cgi">php53_large.cgi</a></td><td><a href="${basePath}/php54_large.cgi">php54_large.cgi</a></td></tr>
     </table>
+</%def>
+<%def name='PAGE_CSS()'>
+    <link rel="stylesheet" type="text/css" href="${self.URL('/static/css/home.css')}">
 </%def>
