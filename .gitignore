@@ -1,4 +1,5 @@
 *.swp
+/.bash_history
 /.bash_logout
 /.bash_profile
 /.bashrc
@@ -6,6 +7,7 @@
 /.gitconfig
 /.kshrc
 /.screenrc
+/.ssh/
 /.viminfo
 /.vimrc
 /.zshrc

@@ -1,7 +1,11 @@
+html {
+    background-color: #EAEAE8;
+}
 body {
     width:90%;
     margin-left: 5%;
     min-width: 500px;
+    background-color: #fcf9f3;
 }
 
 div#header {
@@ -9,12 +13,74 @@ div#header {
     position: relative;
 }
 
-a#logo {
+div.asciiArt {
+    white-space: pre;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 16px;
+    background-color: black;
+    color: #ACA499;
+    padding: 26px;
+}
+.roundedTop {
+    -webkit-border-top-left-radius: 12px;
+    -webkit-border-top-right-radius: 12px;
+    -moz-border-radius-topleft: 12px;
+    -moz-border-radius-topright: 12px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+.roundedBottom {
+    -webkit-border-bottom-left-radius: 12px;
+    -webkit-border-bottom-right-radius: 12px;
+    -moz-border-radius-bottomleft: 12px;
+    -moz-border-radius-bottomright: 12px;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+div#headerOverlay {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    font-size: 162%;
+}
+
+span#logo {
     font-size: 262%;
+    color: #fcf9f3;
 }
 span#slogan {
     font-size: 162%;
+    color: #fcf9f3;
 }
+
+
+div#footer {
+    margin-bottom: 3em;
+    position: relative;
+}
+div#footer div#hostedBy {
+    position: absolute;
+    top: 140px;
+    left: 565px;
+    font-size: 65px;
+}
+div#footer div#hostedBy a {
+    text-decoration: none;
+    color: #b5b2ae
+}
+div#footer div#wfLogo {
+    font-size: 13px;
+    line-height: 16px;
+}
+div#footer div#wfName {
+    position: absolute;
+    top: 230px;
+    left: 360px;
+    font-size: 8px;
+    line-height: 10px;
+}
+
 
 pre.code {
     padding: .5em;

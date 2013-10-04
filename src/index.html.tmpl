@@ -1,10 +1,10 @@
 <%inherit file="_master.html.tmpl" />
 
-<h1>What is Q?</h1>
+<h1><a href="b.html">What is Q?</a></h1>
 <p>Q is a process queue specifically designed for running CGI and PHP at <a href="http://webfaction.com/">WebFaction</a>.</p>
 <p>Normally, CGI and PHP at WebFaction are great, except for one problem: there is no limit to the number of CGI workers that can get created.  So during a traffic spike, it is easy to exceed your account's RAM limits, resulting in all your processes getting killed.  FastCGI is often recommended as an alternative because it allows you to specify the number of worker processes that should be created, but many sites are not totally compatible with FastCGI, and they produce mysterious "500" errors that can cause the site to stop responding.</p>
 <p>Q fixes this problem by only allowing a defined number of CGI workers to run concurrently.  Any additional requests that come in get queued and execute in FIFO order.  This enables you to easily control the maximum amount of RAM you use during traffic spikes.  This solution makes CGI a viable option again.</p>
-<p>Q is developed by <a href="mailto:csebastian3@gmail.com">Christopher Sebastian</a> and <a href="mailto:rsanden@gmail.com">Ryan Sanden</a> (both of whom work at WebFaction).  Feel free to ask us questions and send feedback.</p>
+<p>Q is developed by <a href="mailto:csebastian3@gmail.com">Christopher Sebastian</a> and <a href="mailto:ryan@ryansanden.com">Ryan Sanden</a> (both of whom work at WebFaction).  Feel free to ask us questions and send feedback.</p>
 <h1>Installation</h1>
 <p>Installation consists of two pieces: downloading a Q binary, and then referencing the binary from your website's .htaccess file.</p>
 <ol>
@@ -66,10 +66,10 @@ HELP=1 ./Q.cgi
 </ul>
 <h1>How Q Works</h1>
 <p>Note that the majority of Q's internal options are hard-coded when you select a PHP binary from the table above, so you actually never need to specify these options unless you are in an advanced situation.</p>
-<p>A detailed description of Q's operation is coming soon, but for now, <a href="/bin/q.tar.gz">here is a link to the source code</a>, and below is the normal Q help text:</p>
+<p>A detailed description of Q's operation is coming soon, but for now, <a href="/bin/Q-1.0.0.tar.gz">here is a link to the source code</a>, and below is the normal Q help text:</p>
 <pre class=code>
 
-Q Version 2013-08-28e  --  a FIFO worker queue, capable of running multiple workers at once.
+Q Version 1.0.0  --  a FIFO worker queue, capable of running multiple workers at once.
 
 Typical usage:  COMMAND=/usr/bin/rsync  LOCKFILE='~/.tmp/backups.lock' ./Q [args...]
 

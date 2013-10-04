@@ -1,3 +1,7 @@
+div#content {
+    padding-left: 3em;
+    padding-right: 3em;
+}
 
 table.downloads th.cornerLabel {
     color: #ddd;
