@@ -94,7 +94,7 @@ qÑÑÑÑÑþ    qÑÑÑÑpÆÑÑÑ¯
 </div>
       <div id=headerOverlay>
         <span id=logo>Q</span>
-        <span id=slogan>&nbsp;&nbsp;-&nbsp;&nbsp;A CGI Queue</div>
+        <span id=slogan>&nbsp;&nbsp;-&nbsp;&nbsp;A Process Queue</div>
   ##      <ul id=headerTabs>
   ##        <li class=${'selected' if self.uri.endswith('/index.html.tmpl') else 'unselected'}><a href="${self.URL('/', timestamp=None)}"}>Home</a></li>
   ##        <li class=${'selected' if self.uri.endswith('/photos.html.tmpl') else 'unselected'}><a href="${self.URL('/photos.html', timestamp=None)}"}>Photos</a></li>
@@ -154,7 +154,7 @@ qÊ      Ñþ    _ÑÑÑÑ  Ñþ    _ÑÑÑÑ      Ñþ
 
 ## These are Mako '<%def>' sections.  They override values in the resulting templates.
 ## You can override these <%def>'s in templates that inherit from this one.
-<%def name='TITLE()'>Q CGI Queue</%def>
+<%def name='TITLE()'>Q Process Queue</%def>
 <%def name='PAGE_CSS()'></%def>
 <%def name='PAGE_JS()'></%def>
 <%def name='debugPage()'><% return False %></%def>

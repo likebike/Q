@@ -13,36 +13,11 @@ div#header {
     position: relative;
 }
 
-div.asciiArt {
-    white-space: pre;
-    font-family: monospace;
-    font-size: 13px;
-    line-height: 16px;
-    background-color: black;
-    color: #ACA499;
-    padding: 26px;
-}
-.roundedTop {
-    -webkit-border-top-left-radius: 12px;
-    -webkit-border-top-right-radius: 12px;
-    -moz-border-radius-topleft: 12px;
-    -moz-border-radius-topright: 12px;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-}
-.roundedBottom {
-    -webkit-border-bottom-left-radius: 12px;
-    -webkit-border-bottom-right-radius: 12px;
-    -moz-border-radius-bottomleft: 12px;
-    -moz-border-radius-bottomright: 12px;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-}
 div#headerOverlay {
     position: absolute;
     bottom: 20px;
     right: 20px;
-    font-size: 162%;
+    font-size: 262%;
 }
 
 span#logo {
@@ -80,6 +55,36 @@ div#footer div#wfName {
     font-size: 8px;
     line-height: 10px;
 }
+
+
+
+
+div.asciiArt {
+    white-space: pre;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 16px;
+    background-color: black;
+    color: #ACA499;
+    padding: 26px;
+}
+.roundedTop {
+    -webkit-border-top-left-radius: 12px;
+    -webkit-border-top-right-radius: 12px;
+    -moz-border-radius-topleft: 12px;
+    -moz-border-radius-topright: 12px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+.roundedBottom {
+    -webkit-border-bottom-left-radius: 12px;
+    -webkit-border-bottom-right-radius: 12px;
+    -moz-border-radius-bottomleft: 12px;
+    -moz-border-radius-bottomright: 12px;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
 
 
 pre.code {

@@ -2,7 +2,7 @@
 
 <h1><a href="b.html">What is Q?</a></h1>
 <p>Q is a process queue specifically designed for running CGI and PHP at <a href="http://webfaction.com/">WebFaction</a>.</p>
-<p>Normally, CGI and PHP at WebFaction are great, except for one problem: there is no limit to the number of CGI workers that can get created.  So during a traffic spike, it is easy to exceed your account's RAM limits, resulting in all your processes getting killed.  FastCGI is often recommended as an alternative because it allows you to specify the number of worker processes that should be created, but many sites are not totally compatible with FastCGI, and they produce mysterious "500" errors that can cause the site to stop responding.</p>
+<p>Normally, CGI and PHP at WebFaction are great, except for one problem: there is no limit to the number of CGI workers that can get created.  So during a traffic spike, it is easy to exceed your account's RAM limits, resulting in all your processes getting killed.  FastCGI is often recommended as an alternative because it allows you to specify the number of worker processes that should be created.  Unfortunately, due to some problems with Apache's FastCGI module, many sites produce intermittent "500" errors, or stop responding altogether.  As a result, neither the CGI mode, nor the FastCGI mode is really acceptable for sites that need very high reliability.</p>
 <p>Q fixes this problem by only allowing a defined number of CGI workers to run concurrently.  Any additional requests that come in get queued and execute in FIFO order.  This enables you to easily control the maximum amount of RAM you use during traffic spikes.  This solution makes CGI a viable option again.</p>
 <p>Q is developed by <a href="mailto:csebastian3@gmail.com">Christopher Sebastian</a> and <a href="mailto:ryan@ryansanden.com">Ryan Sanden</a> (both of whom work at WebFaction).  Feel free to ask us questions and send feedback.</p>
 <h1>Installation</h1>
@@ -66,34 +66,45 @@ HELP=1 ./Q.cgi
 </ul>
 <h1>How Q Works</h1>
 <p>Note that the majority of Q's internal options are hard-coded when you select a PHP binary from the table above, so you actually never need to specify these options unless you are in an advanced situation.</p>
-<p>A detailed description of Q's operation is coming soon, but for now, <a href="/bin/Q-1.0.0.tar.gz">here is a link to the source code</a>, and below is the normal Q help text:</p>
+<%
+    import glob, os
+    latest = os.path.basename(sorted(glob.glob(os.path.expanduser('~/www/bigfiles/Q-*.tar.gz')))[-1])
+%>
+<p>A detailed description of Q's operation is coming soon, but for now, <a href="/bin/${latest}">here is a link to the source code</a>, and below is the normal Q help text:</p>
 <pre class=code>
 
-Q Version 1.0.0  --  a FIFO worker queue, capable of running multiple workers at once.
+Q Version 1.1.0  --  a FIFO worker queue, capable of running multiple workers at once.
 
-Typical usage:  COMMAND=/usr/bin/rsync  LOCKFILE='~/.tmp/backups.lock' ./Q [args...]
+Typical usage:  COMMAND=/usr/bin/rsync  ./Q  [args...]
 
 The args get passed directly to COMMAND.
 
 Environment Variables:
 
     COMMAND=path -- Required.  The path to the target executable.  Should usually be an absolute path.
-    LOCKFILE=path -- Required.  The path to the lock file.  More info below.
+    Q_FILE=path -- Required.  The path to the Q queue state file.  More info below.
     CONCURRENCY=num -- Controls the number of workers to run at once.  Default is 1.
     MAX_Q=num -- Controls the maximum queue size (# waiting to run).  Default is -1 (unlimited).
-    AUTO_CREATE_DIRS -- Set to 0 to prevent the lockfile parent directories from being auto-created.
+    AUTO_CREATE_DIRS -- Set to 0 to prevent the Q_FILE parent directories from being auto-created.
     VERBOSE -- Set to 1 to display verbose information.
     HELP -- Set to 1 to display this help message and then exit.
 
-You can use the tilde (~) and environment variables ($VAR) in the LOCKFILE.
+You can use the tilde (~) and environment variables ($VAR) in the Q_FILE.
 This enables you to achieve some interesting queuing structures:
 
-    LOCKFILE=example.lock                   # A relative path can queue jobs based on $PWD.
-    LOCKFILE=/tmp/shared.lock               # A system-wide queue.  (You would need to chmod 666 it.)
-    LOCKFILE='~/myjobs.lock'                # Use a per-account queue.
-    LOCKFILE='~/.tmp/cgi_$SERVER_NAME.lock' # Assuming this is for CGI processes, use a per-domain queue.
+    Q_FILE=example.Q                     # A relative path can queue jobs based on $PWD.
+    Q_FILE=/tmp/shared.Q                 # A system-wide queue.  (You would need to chmod 666 it.)
+    Q_FILE='~/myjobs.Q'                  # Use a per-account queue.
+    Q_FILE='~/.tmp/Q/cgi_$SERVER_NAME.Q' # Assuming this is for CGI processes, use a per-domain queue.
 
 </pre>
+<h1>Performance</h1>
+<ul>
+  <li>Q is implemented in C, and only depends on the C standard library.</li>
+  <li>On a 32-bit system, a Q process uses around 400kB of RSS memory (most of which is from the standard C library, and therefore shared).  On a 64-bit system, a Q process uses around 630kB.</li>
+  <li>Q uses Linux Record Locking for inter-process communication.  This method is very fast and it does not involve any filesystem activity, other than the one-time creation of a lockfile.</li>
+  <li>Q uses intelligent binary search algorithms, along with other optimizations, to achieve excellent scalability and low-resources usage.  It is able to manage more processes than the Linux Kernel is currently able to handle.  (i.e. Q will never be the performance bottleneck.)</li>
+</ul>
 
 <%def name="DL_TABLE(title, basePath)">
     <table class=downloads>

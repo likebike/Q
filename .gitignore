@@ -6,8 +6,10 @@
 /.emacs
 /.gitconfig
 /.kshrc
+/.lesshst
 /.screenrc
 /.ssh/
+/.tmp/
 /.viminfo
 /.vimrc
 /.zshrc
@@ -19,4 +21,6 @@
 /www/bigfiles/
 /www/dev/
 /www/prod/
+
+
 
