@@ -1,4 +1,9 @@
 <%inherit file="_master.html.tmpl" />
+<%
+    import glob, os
+    latest = os.path.basename(sorted(glob.glob(os.path.expanduser('~/www/bigfiles/Q-*.tar.gz')))[-1])
+    latestURL = '/bin/%s'%(latest,)
+%>
 
 <h1><a href="b.html">What is Q?</a></h1>
 <p>Q is a process queue specifically designed for running CGI and PHP at <a href="http://webfaction.com/">WebFaction</a>.</p>
@@ -25,6 +30,7 @@ chmod 755 Q.cgi
     ${self.DL_TABLE('CentOS 6', '/bin/centos6')}
     <h3>If your account is on a CentOS 5 server (Web299 or lower):</h3>
     ${self.DL_TABLE('CentOS 5', '/bin/centos5')}
+    <p>Here is a link to the <a href="${latestURL}">latest source code</a>.  You can also browse the <a href="/bin">distribution mirror</a>.</p>
   </li>
 
   <li>
@@ -65,12 +71,35 @@ HELP=1 ./Q.cgi
   </li>
 </ul>
 <h1>How Q Works</h1>
-<p>Note that the majority of Q's internal options are hard-coded when you select a PHP binary from the table above, so you actually never need to specify these options unless you are in an advanced situation.</p>
-<%
-    import glob, os
-    latest = os.path.basename(sorted(glob.glob(os.path.expanduser('~/www/bigfiles/Q-*.tar.gz')))[-1])
-%>
-<p>A detailed description of Q's operation is coming soon, but for now, <a href="/bin/${latest}">here is a link to the source code</a>, and below is the normal Q help text:</p>
+<div class=exampleContainer>
+  <div class=exampleSidebar>
+    <p>This example introduces how to use <span class=progName>Q</span> as a general process queue tool.  This mode of operation is very flexible and powerful, and ideal for interactive, command-line-based tasks.</p>
+    <p>Two <span class=progName>Q</span> options are introduced:</p>
+    <ul>
+      <li><span class=mono>COMMAND</span> -- The path to the target command.  (The only required parameter.)</li>
+      <li><span class=mono>CONCURRENCY</span> -- The number of processes to run simultaneously.</li>
+    </ul>
+  </div>
+  <h2>Example #1: Running <span class=mono>N</span> Processes at at Time</h2>
+  <p>Pretend that you have a program named <span class=progName>SWAAG</span>, which converts <a href="input.png">images</a> to <a href="output.txt">ASCII art</a>.  The generation of this ASCII art is very CPU-intensive, but not demanding in terms of RAM or Disk I/O.  <span class=progName>SWAAG</span> is single-threaded and synchronous, so it only uses one CPU core when it runs.  Also pretend that your computer has 4 CPU cores, but you only want to use 3 of them for ASCII art conversions.  (You need the other core for YouTube, of course!)  You have a directory with 100 images that you need to convert, named <span class=mono>image00.png</span> to <span class=mono>image99.png</span>.</p>
+  <p><span class=progName>Q</span> makes these kinds of tasks easy.  You would just need to type this <span class=progName>bash</span> command:</p>
+<pre class=code>\
+for image in image*.png; do
+    COMMAND=swaag CONCURRENCY=3 ./Q "$image" --charmap ascii_extended
+done
+</pre>
+  <p>Here are some graphical views of the execution (click to enlarge):</p>
+  <a href="${self.URL('/static/img/q_ex1_sys_view_1024.png')}"><img src="${self.URL('/static/img/q_ex1_sys_view_500.png')}"></a>
+  <img src="http://dummyimage.com/400x248/000/fff">
+  <p>There are several phases of execution, as shown in the diagrams above:</p>
+  <h3>The <span class=mono>START</span> Phase:</h3>
+  <h3>The <span class=mono>QUEUEING</span> Phase:</h3>
+  <h3>The <span class=mono>EXECUTING</span> Phase:</h3>
+  <h3>The <span class=mono>END</span> Phase:</h3>
+    <p>This is the point right before you type the above command and press <span class=mono>ENTER</span>.  At this point, no <span class=progName>Q</span> or <span class=progName>SWAAG</span> processes are running.</p>
+</div>
+
+
 <pre class=code>
 
 Q Version 1.1.0  --  a FIFO worker queue, capable of running multiple workers at once.

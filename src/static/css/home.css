@@ -18,3 +18,12 @@ table.downloads th.leftLabel span.labelDesc {
 table.downloads td {
     text-align: center;
 }
+
+div.exampleContainer {
+    position: relative;
+}
+div.exampleSidebar {
+    float: right;
+    width: 25em;
+    background-color: #ff9;
+}
