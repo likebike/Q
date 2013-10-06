@@ -8,3 +8,8 @@ edit Makefile, set root directory:
 
 make
 
+cd www/dev
+python -m'SimpleHTTPServer'
+
+curl http://127.0.0.1:8000/
+
