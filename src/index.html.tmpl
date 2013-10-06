@@ -112,33 +112,33 @@ done
 <pre class=code>\
 0 * * * * CONCURRENCY=1 MAX_Q=0 COMMAND=/usr/bin/pg_dump ~/bin/Q -U mypguser -f ~/pg_backups/mydb.sql mydb
 </pre>
-  <p>This will run <span class=mono>Q</span> each hour, instructing <span class=mono>Q</span> to run the command "<span class=mono>/usr/bin/pg_dump -U mypguser -f /home/myuser/pg_backups/mydb.sql mydb</span>" with <span class=mono>CONCURRENCY=1</span> and <span class=mono>MAX_Q=0</span>. This means that the <span class=mono>pg_dump</span> commands will execute one at a time (<span class=mono>CONCURRENCY=1</span>), and that processes never queue up, but instead exit immediately without running (<span class=mono>MAX_Q=0</span>).</p>
+  <p>This will run <span class=progName>Q</span> each hour, instructing <span class=progName>Q</span> to run the command "<span class=mono>/usr/bin/pg_dump -U mypguser -f /home/myuser/pg_backups/mydb.sql mydb</span>" with <span class=mono>CONCURRENCY=1</span> and <span class=mono>MAX_Q=0</span>. This means that the <span class=progName>pg_dump</span> commands will execute one at a time (<span class=mono>CONCURRENCY=1</span>), and that processes never queue up, but instead exit immediately without running (<span class=mono>MAX_Q=0</span>).</p>
   <p>To understand how this works, it's helpful to visualize the process array:</p>
   <img src="http://dummyimage.com/500x310/000/fff">
   <img src="http://dummyimage.com/500x310/000/fff">
-  <p>The <span class=mono>Q</span> process array has two regions, the <span class=mono>RUNNING</span> region and the <span class=mono>WAITING</span> region. When a new <span class=mono>Q</span> process is launched, it inserts itself at the end of the array.</p>
+  <p>The <span class=progName>Q</span> process array has two regions, the <span class=mono>RUNNING</span> region and the <span class=mono>WAITING</span> region. When a new <span class=progName>Q</span> process is launched, it inserts itself at the end of the array.</p>
   <ul>
-    <li>If it lands in one of the first few spots, in the <span class=mono>RUNNING</span> region, then <span class=mono>Q</span> immediately executes the command.</li>
-    <li>If it lands in the <span class=mono>WAITING</span> region, then <span class=mono>Q</span> will wait in line until it reaches the <span class=mono>RUNNING</span> region before executing its associated command.</li>
-    <li>If it lands after the end of the queue, past the <span class=mono>WAITING</span> region, then all slots are already full. <span class=mono>Q</span> exits immediately without running the command at all.</li>
+    <li>If it lands in one of the first few spots, in the <span class=mono>RUNNING</span> region, then <span class=progName>Q</span> immediately executes the command.</li>
+    <li>If it lands in the <span class=mono>WAITING</span> region, then <span class=progName>Q</span> will wait in line until it reaches the <span class=mono>RUNNING</span> region before executing its associated command.</li>
+    <li>If it lands after the end of the queue, past the <span class=mono>WAITING</span> region, then all slots are already full. <span class=progName>Q</span> exits immediately without running the command at all.</li>
   </ul>
-  <p>As soon as any one of the processes in the <span class=mono>RUNNING</span> region finishes, all of the <span class=mono>Q</span> processes waiting in line behind it move forward. This means that the next-in-line <span class=mono>WAITING</span> <span class=mono>Q</span> process will move into a <span class=mono>RUNNING</span> slot, and then <span class=mono>Q</span> will execute it. It also means that there is one more empty slot in the <span class=mono>WAITING</span> region, which a new <span class=mono>Q</span> process could come and fill.</p>
-  <p>One important feature of this approach is that there is no "master" Q process which runs as a daemon and regulates all of the other processes. All of the Q processes are independent and you do not need to manage a "Q server" which handles the scheduling. Each individual <span class=mono>Q</span> process follows the following logic:</p>
+  <p>As soon as any one of the processes in the <span class=mono>RUNNING</span> region finishes, all of the <span class=progName>Q</span> processes waiting in line behind it move forward. This means that the next-in-line <span class=mono>WAITING</span> <span class=progName>Q</span> process will move into a <span class=mono>RUNNING</span> slot, and then <span class=progName>Q</span> will execute it. It also means that there is one more empty slot in the <span class=mono>WAITING</span> region, which a new <span class=progName>Q</span> process could come and fill.</p>
+  <p>One important feature of this approach is that there is no "master" <span class=progName>Q</span> process which runs as a daemon and regulates all of the other processes. All of the <span class=progName>Q</span> processes are independent and you do not need to manage a "<span class=progName>Q</span> server" which handles the scheduling. Each individual <span class=progName>Q</span> process follows the following logic:</p>
   <ul> 
-    <li>If <span class=mono>(position &lt;= CONCURRENCY)</span>:<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=mono>exec</span> associated command (which completes this <span class=mono>Q</span> process)</li>
+    <li>If <span class=mono>(position &lt;= CONCURRENCY)</span>:<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=mono>exec</span> associated command (which completes this <span class=progName>Q</span> process)</li>
     <br/>
     <li>If <span class=mono>(CONCURRENCY &lt; position &lt;= (CONCURRENCY + MAX_Q))</span>:<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=mono>sleep</span> awhile and then check <span class=mono>position</span> again.</li>
     <br/>
     <li>If <span class=mono>position &gt; (CONCURRENCY + MAX_Q))</span>:<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=mono>exit(-17)</span> without running the command.</li>
     <br/>
   </ul>
-  <p>As demonstrated, <span class=mono>Q</span> uses environment variables for configuration. These settings can also be defined at compile-time. Furthermore, if you define a setting this way, it cannot be overridden with an environment variable. This is by design - it allows administrators to hard-code values and be sure that they don't change.</p>
+  <p>As demonstrated, <span class=progName>Q</span> uses environment variables for configuration. These settings can also be defined at compile-time. Furthermore, if you define a setting this way, it cannot be overridden with an environment variable. This is by design - it allows administrators to hard-code values and be sure that they don't change.</p>
   <p>To hard-code a value, define them as macros at compile time via the <span class=mono>CFLAGS</span> <span class=mono>make</span> variable. For example, the following will hard-code <span class=mono>CONCURRENCY=1</span> and <span class=mono>MAX_Q=0</span>, and rename the resultant file to <span class=mono>run_single</span>, because that's what it does:</p>
 <pre class=code>
 make CFLAGS="-DCONCURRENCY=1 -DMAX_Q=0"
 mv ./Q ./run_single
 </pre>
-  <p>At this point, the "<span class=mono>run_single</span>" binary is <span class=mono>Q</span> with some hard-coded values. You would run the database cron using this new binary as follows:</p>
+  <p>At this point, the "<span class=mono>run_single</span>" binary is <span class=progName>Q</span> with some hard-coded values. You would run the database cron using this new binary as follows:</p>
 <pre class=code>\
 0 * * * * COMMAND=/usr/bin/pg_dump ~/bin/run_single -U mypguser -f ~/pg_backups/mydb.sql mydb
 </pre>
