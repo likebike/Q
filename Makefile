@@ -1,19 +1,20 @@
 # Adjust this Makefile to suit your server and project requirements.
 
+MYROOT=${HOME}/tmp/q_site
 
 # The MakoFW location:
-MAKOFW_DIR=${HOME}/makofw
+MAKOFW_DIR=${MYROOT}/makofw
 
 # The "source" files:
-SRC_DIR=${HOME}/src
+SRC_DIR=${MYROOT}/src
 
 # The publication locations:
-WWW_DEV=${HOME}/www/dev
-WWW_PROD=${HOME}/www/prod
+export WWW_ROOT:=${MYROOT}/www
+WWW_DEV=${WWW_ROOT}/dev
+WWW_PROD=${WWW_ROOT}/prod
 
 # The python binary to use:
 PYTHON=python2.7
-
 
 export PYTHONPATH:=${MAKOFW_DIR}/lib/python:${PYTHONPATH}
 
@@ -34,7 +35,7 @@ raw_prod:
 	${PYTHON} ${MAKOFW_DIR}/bin/publish.py "${SRC_DIR}" "${WWW_PROD}"
 
 sync_bigfiles:
-	( cd ${SRC_DIR}/bin; ln -sf ~/www/bigfiles/* ./ )
+	( cd ${SRC_DIR}/bin; ln -sf ${WWW_ROOT}/bigfiles/* ./ )
 
 # Touch some critical files that force the whole site to be rebuilt:
 touch:

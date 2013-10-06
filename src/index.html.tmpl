@@ -1,7 +1,7 @@
 <%inherit file="_master.html.tmpl" />
 <%
     import glob, os
-    latest = os.path.basename(sorted(glob.glob(os.path.expanduser('~/www/bigfiles/Q-*.tar.gz')))[-1])
+    latest = os.path.basename(sorted(glob.glob(os.path.join(os.environ['WWW_ROOT'], 'bigfiles/Q-*.tar.gz')))[-1])
     latestURL = '/bin/%s'%(latest,)
 %>
 
