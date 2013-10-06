@@ -6,7 +6,7 @@
 %>
 
 <h1><a href="b.html">What is Q?</a></h1>
-<p>Q is a process queue specifically designed for running CGI and PHP at <a href="http://webfaction.com/">WebFaction</a>.</p>
+<p>Q is a serverless, generic process queue specifically designed for running CGI and PHP at <a href="http://webfaction.com/">WebFaction</a>.</p>
 <p>Normally, CGI and PHP at WebFaction are great, except for one problem: there is no limit to the number of CGI workers that can get created.  So during a traffic spike, it is easy to exceed your account's RAM limits, resulting in all your processes getting killed.  FastCGI is often recommended as an alternative because it allows you to specify the number of worker processes that should be created.  Unfortunately, due to some problems with Apache's FastCGI module, many sites produce intermittent "500" errors, or stop responding altogether.  As a result, neither the CGI mode, nor the FastCGI mode is really acceptable for sites that need very high reliability.</p>
 <p>Q fixes this problem by only allowing a defined number of CGI workers to run concurrently.  Any additional requests that come in get queued and execute in FIFO order.  This enables you to easily control the maximum amount of RAM you use during traffic spikes.  This solution makes CGI a viable option again.</p>
 <p>Q is developed by <a href="mailto:csebastian3@gmail.com">Christopher Sebastian</a> and <a href="mailto:ryan@ryansanden.com">Ryan Sanden</a> (both of whom work at WebFaction).  Feel free to ask us questions and send feedback.</p>
@@ -110,17 +110,17 @@ done
   <p>Pretend that you have a production PostgreSQL database that your business depends on. Data changes often, so you need to take hourly backups. Most of the time, those backups complete within a minute or two. However, if the database server is particularly busy, it could take longer. You can't really know in advance the maximum length of time that any one export could take, and you don't want more than one of these database export processes running at once. If it happens that a previous export process is still running when the next starts, the new one should just exit immediately without running. You never want these processes to overlap.
   <p><span class=progName>Q</span> can also be used for this type of application. You would use an hourly cron job like this:</p>
 <pre class=code>\
-0 * * * * CMD=/usr/bin/pg_dump CONCURRENCY=1 MAX_Q=0 /home/myuser/bin/Q -U mypguser -f /home/myuser/pg_backups/mydb.sql mydb
+0 * * * * CONCURRENCY=1 MAX_Q=0 COMMAND=/usr/bin/pg_dump ~/bin/Q -U mypguser -f ~/pg_backups/mydb.sql mydb
 </pre>
   <p>This will run <span class=mono>Q</span> each hour, instructing <span class=mono>Q</span> to run the command "<span class=mono>/usr/bin/pg_dump -U mypguser -f /home/myuser/pg_backups/mydb.sql mydb</span>" with <span class=mono>CONCURRENCY=1</span> and <span class=mono>MAX_Q=0</span>. This means that the <span class=mono>pg_dump</span> commands will execute one at a time (<span class=mono>CONCURRENCY=1</span>), and that processes never queue up, but instead exit immediately without running (<span class=mono>MAX_Q=0</span>).</p>
   <p>To understand how this works, it's helpful to visualize the process array:</p>
   <img src="http://dummyimage.com/500x310/000/fff">
   <img src="http://dummyimage.com/500x310/000/fff">
-  <p>The <span class=mono>Q</span> process array has two regions, the <span class=mono>RUNNING</span> region and the <span class=mono>WAITING</span> region. When a new <span class=mono>Q</span> process is launched, it inserts itself at the end of the array. If it lands...</p>
+  <p>The <span class=mono>Q</span> process array has two regions, the <span class=mono>RUNNING</span> region and the <span class=mono>WAITING</span> region. When a new <span class=mono>Q</span> process is launched, it inserts itself at the end of the array.</p>
   <ul>
-    <li>... in one of the first few spots, in the <span class=mono>RUNNING</span> region, then <span class=mono>Q</span> immediately executes the command.</li>
-    <li>... in the <span class=mono>WAITING</span> region, then <span class=mono>Q</span> will wait in line until it reaches the <span class=mono>RUNNING</span> region before executing its associated command.</li>
-    <li>... after the end of the queue, past the <span class=mono>WAITING</span> region, then all slots are already full. <span class=mono>Q</span> exits immediately without running the command at all.</li>
+    <li>If it lands in one of the first few spots, in the <span class=mono>RUNNING</span> region, then <span class=mono>Q</span> immediately executes the command.</li>
+    <li>If it lands in the <span class=mono>WAITING</span> region, then <span class=mono>Q</span> will wait in line until it reaches the <span class=mono>RUNNING</span> region before executing its associated command.</li>
+    <li>If it lands after the end of the queue, past the <span class=mono>WAITING</span> region, then all slots are already full. <span class=mono>Q</span> exits immediately without running the command at all.</li>
   </ul>
   <p>As soon as any one of the processes in the <span class=mono>RUNNING</span> region finishes, all of the <span class=mono>Q</span> processes waiting in line behind it move forward. This means that the next-in-line <span class=mono>WAITING</span> <span class=mono>Q</span> process will move into a <span class=mono>RUNNING</span> slot, and then <span class=mono>Q</span> will execute it. It also means that there is one more empty slot in the <span class=mono>WAITING</span> region, which a new <span class=mono>Q</span> process could come and fill.</p>
   <p>One important feature of this approach is that there is no "master" Q process which runs as a daemon and regulates all of the other processes. All of the Q processes are independent and you do not need to manage a "Q server" which handles the scheduling. Each individual <span class=mono>Q</span> process follows the following logic:</p>
@@ -132,6 +132,26 @@ done
     <li>If <span class=mono>position &gt; (CONCURRENCY + MAX_Q))</span>:<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=mono>exit(-17)</span> without running the command.</li>
     <br/>
   </ul>
+  <p>As demonstrated, <span class=mono>Q</span> uses environment variables for configuration. These settings can also be defined at compile-time. Furthermore, if you define a setting this way, it cannot be overridden with an environment variable. This is by design - it allows administrators to hard-code values and be sure that they don't change.</p>
+  <p>To hard-code a value, define them as macros at compile time via the <span class=mono>CFLAGS</span> <span class=mono>make</span> variable. For example, the following will hard-code <span class=mono>CONCURRENCY=1</span> and <span class=mono>MAX_Q=0</span>, and rename the resultant file to <span class=mono>run_single</span>, because that's what it does:</p>
+<pre class=code>
+make CFLAGS="-DCONCURRENCY=1 -DMAX_Q=0"
+mv ./Q ./run_single
+</pre>
+  <p>At this point, the "<span class=mono>run_single</span>" binary is <span class=mono>Q</span> with some hard-coded values. You would run the database cron using this new binary as follows:</p>
+<pre class=code>\
+0 * * * * COMMAND=/usr/bin/pg_dump ~/bin/run_single -U mypguser -f ~/pg_backups/mydb.sql mydb
+</pre>
+  <p>You now have a convenient portable binary application that runs a single instance of a program at once.</p>
+  <p>Any of the following five variables can be defined at compile-time. Each of these answers a different question:</p>
+  <ul>
+    <li><span class=mono>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;COMMAND</span>&nbsp;&nbsp;--&nbsp;&nbsp;Which program should run?</li>
+    <li><span class=mono>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CONCURRENCY</span>&nbsp;&nbsp;--&nbsp;&nbsp;How many instances can be running at once?</li>
+    <li><span class=mono>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MAX_Q</span>&nbsp;&nbsp;--&nbsp;&nbsp;How many instances can wait in line if all running slots are full?</li>
+    <li><span class=mono>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Q_FILE</span>&nbsp;&nbsp;--&nbsp;&nbsp;How do we define which queue a process is put into?</li>
+    <li><span class=mono>AUTO_CREATE_DIRS</span>&nbsp;&nbsp;--&nbsp;&nbsp;Should parent directories of the <span class=mono>Q_FILE</span> be created automatically?</li>
+  </ul>
+  <p>The variables <span class=mono>Q_FILE</span> and <span class=mono>AUTO_CREATE_DIRS</span> will be explained in more detail shortly.</p>
 </div>
 
 
