@@ -6,7 +6,7 @@
 %>
 
 <h1>What is Q?</h1>
-<p>Q is a serverless, generic process queue specifically designed for running CGI and PHP at <a href="http://webfaction.com/">WebFaction</a>.</p>
+<p>Q is a serverless, general-purpose process queue specifically designed for running CGI and PHP at <a href="http://webfaction.com/">WebFaction</a>.</p>
 <p>Normally, CGI and PHP at WebFaction are great, except for one problem: there is no limit to the number of CGI workers that can get created.  So during a traffic spike, it is easy to exceed your account's RAM limits, resulting in all your processes getting killed.  FastCGI is often recommended as an alternative because it allows you to specify the number of worker processes that should be created.  Unfortunately, due to some problems with Apache's FastCGI module, many sites produce intermittent "500" errors, or stop responding altogether.  As a result, neither the CGI mode, nor the FastCGI mode is really acceptable for sites that need very high reliability.</p>
 <p>Q fixes this problem by only allowing a defined number of CGI workers to run concurrently.  Any additional requests that come in get queued and execute in FIFO order.  This enables you to easily control the maximum amount of RAM you use during traffic spikes.  This solution makes CGI a viable option again.</p>
 <p>Q is developed by <a href="mailto:csebastian3@gmail.com">Christopher Sebastian</a> and <a href="mailto:ryan@ryansanden.com">Ryan Sanden</a> (both of whom work at WebFaction).  Feel free to ask us questions and send feedback.</p>
@@ -90,8 +90,14 @@ done
 <!-- COMMAND=swaag CONCURRENCY=3 ./Q -m ascii_ext -s putty-CourierNew-8 sandwich2.png -->
 </pre>
   <p>Here are some graphical views of the execution (click to enlarge):</p>
-  <a href="${self.URL('/static/img/q_ex1_sys_view_1024.png')}"><img src="${self.URL('/static/img/q_ex1_sys_view_500.png')}"></a>
-  <img src="http://dummyimage.com/400x248/000/fff">
+  <div class=imgContainer>
+    <div class=imgTitle>Execution Status, Per-Image View</div>
+    <a href="${self.URL('/static/img/q_ex1_image_view_1024.png')}"><img src="${self.URL('/static/img/q_ex1_image_view_500.png')}"></a>
+  </div>
+  <div class="imgContainer padLeft">
+    <div class=imgTitle>Execution Status, System View</div>
+    <a href="${self.URL('/static/img/q_ex1_system_view_1024.png')}"><img src="${self.URL('/static/img/q_ex1_system_view_500.png')}"></a>
+  </div>
   <p>There are several phases of execution, as shown in the diagrams above:</p>
   <h3>The <span class=mono>START</span> Phase:</h3>
   <h3>The <span class=mono>QUEUEING</span> Phase:</h3>
@@ -108,7 +114,7 @@ done
     </ul>
   </div>
   <h2>Example #2: Running One Process at at Time</h2>
-  <p>Pretend that you have a production PostgreSQL database that your business depends on. Data changes often, so you need to take hourly backups. Most of the time, those backups complete within a minute or two. However, if the database server is particularly busy, it could take longer. You can't really know in advance the maximum length of time that any one export could take, and you don't want more than one of these database export processes running at once. If it happens that a previous export process is still running when the next starts, the new one should just exit immediately without running. You never want these processes to overlap.
+  <p>Pretend that you have a production PostgreSQL database that your business depends on. Data changes often, so you need to take hourly backups. Most of the time, those backups complete within the hour. However, if the database server is particularly busy, it could take longer. You can't really know in advance the maximum length of time that any one export could take, and you don't want more than one of these database export processes running at once. If it happens that a previous export process is still running when the next starts, the new one should just exit immediately without running. You never want these processes to overlap.
   <p><span class=progName>Q</span> can also be used for this type of application. You would use an hourly cron job like this:</p>
 <pre class=code>\
 0 * * * * CONCURRENCY=1 MAX_Q=0 COMMAND=/usr/bin/pg_dump ~/bin/Q -U mypguser -f ~/pg_backups/mydb.sql mydb
@@ -193,11 +199,12 @@ This enables you to achieve some interesting queuing structures:
     Q_FILE='~/.tmp/Q/cgi_$SERVER_NAME.Q' # Assuming this is for CGI processes, use a per-domain queue.
 
 </pre>
-<h1>Performance</h1>
+<h1>Performance &amp; Reliability</h1>
 <ul>
   <li>Q is implemented in C, and depends only on the C standard library.</li>
-  <li>On a 32-bit system, a Q process uses around 400kB of RSS memory (most of which is from the standard C library, and therefore shared).  On a 64-bit system, a Q process uses around 630kB.</li>
   <li>Q uses Linux Record Locking for inter-process communication.  This method is very fast and it does not involve any filesystem activity, other than the one-time creation of a lockfile.</li>
+  <li>Since Linux Record Locking is managed by the Linux Kernel, the queue is guaranteed to never get "stuck", even if processes crash, or sent un-handlable signals like SIGSTOP and SIGKILL.</li>
+  <li>On a 32-bit system, a Q process uses around 400kB of RSS memory (most of which is from the standard C library, and therefore shared).  On a 64-bit system, a Q process uses around 630kB.</li>
   <li>Q uses intelligent binary search algorithms, along with other optimizations, to achieve excellent scalability and low-resources usage.  It is able to manage more processes than the Linux Kernel is currently able to handle.  (i.e. Q will never be the performance bottleneck.)</li>
 </ul>
 

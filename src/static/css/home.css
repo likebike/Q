@@ -27,3 +27,15 @@ div.exampleSidebar {
     width: 25em;
     background-color: #ff9;
 }
+
+div.imgContainer {
+    display: inline-block;
+}
+div.imgContainer.padLeft {
+    margin-left: 2em;
+}
+div.imgContainer div.imgTitle {
+    text-align: center;
+    font-size: 127%;
+    font-weight: bold;
+}
