@@ -89,11 +89,11 @@ for image in image*.png; do
 done
 </pre>
   <p>Here are some graphical views of the execution (click to enlarge):</p>
-  <div class=imgContainer>
+  <div class="imgContainer padRight">
     <div class=imgTitle>Execution Status, Per-Image View</div>
     <a href="${self.URL('/static/img/q_ex1_image_view_1024.png')}"><img src="${self.URL('/static/img/q_ex1_image_view_500.png')}"></a>
   </div>
-  <div class="imgContainer padLeft">
+  <div class=imgContainer>
     <div class=imgTitle>Execution Status, System View</div>
     <a href="${self.URL('/static/img/q_ex1_system_view_1024.png')}"><img src="${self.URL('/static/img/q_ex1_system_view_500.png')}"></a>
   </div>
@@ -120,8 +120,30 @@ done
 </pre>
   <p>This will run <span class=progName>Q</span> each hour, instructing <span class=progName>Q</span> to run the command "<span class=mono>/usr/bin/pg_dump -U mypguser -f /home/myuser/pg_backups/mydb.sql mydb</span>" with <span class=mono>CONCURRENCY=1</span> and <span class=mono>MAX_Q=0</span>. This means that the <span class=progName>pg_dump</span> commands will execute one at a time (<span class=mono>CONCURRENCY=1</span>), and that processes never queue up, but instead exit immediately without running (<span class=mono>MAX_Q=0</span>).</p>
   <p>To understand how this works, it's helpful to visualize the process array:</p>
-  <img src="http://dummyimage.com/500x310/000/fff">
-  <img src="http://dummyimage.com/500x310/000/fff">
+  <table class=autoSizer><tr class=autoSizer><td class=autoSizer>
+    <div class="imgContainer">
+      <div class=imgTitle>Structure Overview</div>
+      <img src="${self.URL('/static/img/q_ex2_01_structure.png')}">
+    </div>
+  </td></tr></table>
+  <table class=autoSizer><tr class=autoSizer><td class=autoSizer>
+    <div class="imgContainer">
+      <div class=imgTitle>Adding a Process to the Queue</div>
+      <img src="${self.URL('/static/img/q_ex2_02_adding.png')}">
+    </div>
+  </td></tr></table>
+  <table class=autoSizer><tr class=autoSizer><td class=autoSizer>
+    <div class="imgContainer">
+      <div class=imgTitle>Removing a Process from the Queue</div>
+      <img src="${self.URL('/static/img/q_ex2_03_removing.png')}">
+    </div>
+  </td></tr></table>
+  <table class=autoSizer><tr class=autoSizer><td class=autoSizer>
+    <div class="imgContainer">
+      <div class=imgTitle>Discarding Processes when Queue is Full</div>
+      <img src="${self.URL('/static/img/q_ex2_04_full.png')}">
+    </div>
+  </td></tr></table>
   <p>The <span class=progName>Q</span> process array has two regions, the <span class=mono>RUNNING</span> region and the <span class=mono>WAITING</span> region. When a new <span class=progName>Q</span> process is launched, it inserts itself at the end of the array.</p>
   <ul>
     <li>If it lands in one of the first few spots, in the <span class=mono>RUNNING</span> region, then <span class=progName>Q</span> immediately executes the command.</li>

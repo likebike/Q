@@ -30,12 +30,22 @@ div.exampleSidebar {
 
 div.imgContainer {
     display: inline-block;
+    margin-bottom: 2em;
 }
-div.imgContainer.padLeft {
-    margin-left: 2em;
+div.imgContainer.padRight {
+    margin-right: 2em;
 }
-div.imgContainer div.imgTitle {
+div.imgContainer div.imgTitle,
+div.imgContainerBlock div.imgTitle {
     text-align: center;
     font-size: 127%;
     font-weight: bold;
+}
+
+table.autoSizer {
+    margin: 0;
+}
+table.autoSizer td.autoSizer {
+    border: none;
+    padding: 0;
 }
