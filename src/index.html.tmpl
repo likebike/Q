@@ -1,4 +1,4 @@
-<%inherit file="_master.html.tmpl" />
+<%inherit file="_master_pretty.html.tmpl" />
 <%
     import glob, os
     latest = os.path.basename(sorted(glob.glob(os.path.join(os.environ['WWW_ROOT'], 'bigfiles/Q-*.tar.gz')))[-1])
@@ -81,12 +81,13 @@ HELP=1 ./Q.cgi
     </ul>
   </div>
   <h2>Example #1: Running <span class=mono>N</span> Processes at at Time</h2>
-  <p>Pretend that you have written a program named <span class=progName>SWAAG</span>, which converts <a href="input.png">images</a> to <a href="output.txt">ASCII art</a>.  The generation of this ASCII art is very CPU-intensive, but not demanding in terms of RAM or Disk I/O.  <span class=progName>SWAAG</span> is single-threaded and synchronous, so it only uses one CPU core when it runs.  Also pretend that your computer has 4 CPU cores, but you only want to use 3 of them for ASCII art conversions.  (You need the other core for <strike>productivity</strike> YouTube.)  You have a directory with 100 images that you need to convert, named <span class=mono>image00.png</span> to <span class=mono>image99.png</span>.</p>
+  <p>Pretend that you have written a program named <span class=progName>SWAAG</span>, which converts <a href="http://xkcd.com/979/">images</a> to <a href="xkcd_979.html">ASCII art</a>.  The generation of this ASCII art is very CPU-intensive, but not demanding in terms of RAM or Disk I/O.  <span class=progName>SWAAG</span> is single-threaded and synchronous, so it only uses one CPU core when it runs.  Also pretend that your computer has 4 CPU cores, but you only want to use 3 of them for ASCII art conversions.  (You need the other core for <strike>productivity</strike> YouTube.)  You have a directory with 100 images that you need to convert, named <span class=mono>image00.png</span> to <span class=mono>image99.png</span>.</p>
   <p><span class=progName>Q</span> makes these kinds of tasks easy.  You would just need to type this <span class=progName>bash</span> command:</p>
 <pre class=code>\
 for image in image*.png; do
-    COMMAND=swaag CONCURRENCY=3 ./Q "$image" --charmap ascii_extended
+    COMMAND=swaag CONCURRENCY=3 ./Q "$image" 
 done
+<!-- COMMAND=swaag CONCURRENCY=3 ./Q -m ascii_ext -s putty-CourierNew-8 sandwich2.png -->
 </pre>
   <p>Here are some graphical views of the execution (click to enlarge):</p>
   <a href="${self.URL('/static/img/q_ex1_sys_view_1024.png')}"><img src="${self.URL('/static/img/q_ex1_sys_view_500.png')}"></a>
@@ -153,7 +154,14 @@ mv ./Q ./run_single
     <li><span class=mono>AUTO_CREATE_DIRS</span>&nbsp;&nbsp;--&nbsp;&nbsp;Should parent directories of the <span class=mono>Q_FILE</span> be created automatically?</li>
   </ul>
   <p>The variables <span class=mono>Q_FILE</span> and <span class=mono>AUTO_CREATE_DIRS</span> will be explained in more detail shortly.</p>
+  <h2>Example #3: Running N processes at a time, allowing only M to be queued at once</h2>
+  <p>You are running a PHP website in CGI mode. You want to handle 3 concurrent requests, but you also can't afford to queue unlimited numbers of requests because Apache processes are very heavy.<p>
+  <p><span class=progName>Q</span> can also be used for this type of application. You would use an hourly cron job like this:</p>
+<pre class=code>\
+0 * * * * CONCURRENCY=1 MAX_Q=0 COMMAND=/usr/bin/pg_dump ~/bin/Q -U mypguser -f ~/pg_backups/mydb.sql mydb
+</pre>
 </div>
+
 
 
 
