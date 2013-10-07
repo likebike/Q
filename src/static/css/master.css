@@ -85,6 +85,15 @@ div.asciiArt {
     border-bottom-right-radius: 12px;
 }
 
+div.asciiArt_white_small {
+    white-space: pre;
+    font-family: monospace;
+    font-size: 8px;
+    line-height: 10px;
+    background-color: #eaeae8;
+    color: #111;
+    padding: 26px;
+}
 
 
 pre.code {
