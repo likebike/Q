@@ -100,10 +100,60 @@ done
   </div>
   <p>There are several phases of execution, as shown in the diagrams above:</p>
   <h3>The <span class=mono>START</span> Phase:</h3>
+  <p>This is the point right before you type the above command and press <span class=mono>ENTER</span>.  At this point, no <span class=progName>Q</span> or <span class=progName>SWAAG</span> processes are running.</p>
   <h3>The <span class=mono>QUEUEING</span> Phase:</h3>
+  <p>This phase represents the fraction of a second when the above bash loop is running.  The bash loop quickly launches 100 <span class=progName>Q</span> processes in the background.  At the end of this phase, you will momentarily have approximately 100 <span class=progName>Q</span> processes running:
+<pre class=code>\
+$ ps -o pid,rss,%cpu,cmd -p $(pgrep -u $USER '^Q$|^swaag$')
+  PID    RSS  %CPU  CMD
+ 1000    540   0.0  Q
+ 1001    540   0.0  Q
+ 1002    540   0.0  Q
+ 1003    540   0.0  Q
+ 1004    540   0.0  Q
+ 1005    540   0.0  Q
+ ...
+ ...
+ 1097    540   0.0  Q
+ 1098    540   0.0  Q
+ 1099    540   0.0  Q
+</pre>
+  <p>Immediately, 3 of the <span class=progName>Q</span> processes will convert themselves into <span class=progName>SWAAG</span> processes (because we specified <span class=mono>CONCURRENCY=3</span>).  Note that the original process ID (<span class=mono>PID</span>) numbers will be retained, since <span class=mono>exec</span> is used (this is a critical feature for many advanced cases).  At that point, there would be 3 <span class=progName>SWAAG</span> processes and 97 <span class=progName>Q</span> processes.  The process listing would look something like this:</p>
+<pre class=code>\
+$ ps -o pid,rss,%cpu,cmd -p $(pgrep -u $USER '^Q$|^swaag$')
+  PID    RSS  %CPU  CMD
+ 1000  58000  99.9  swaag
+ 1001  55000  99.9  swaag
+ 1002  59000  99.9  swaag
+ 1003    540   0.0  Q
+ 1004    540   0.0  Q
+ 1005    540   0.0  Q
+ ...
+ ...
+ 1097    540   0.0  Q
+ 1098    540   0.0  Q
+ 1099    540   0.0  Q
+</pre>
   <h3>The <span class=mono>EXECUTION</span> Phase:</h3>
+    <p>After a <span class=progName>SWAAG</span> process completes, the next <span class=progName>Q</span> in line will convert itself into a new <span class=progName>SWAAG</span> and start running.  The process listing would look something like this (notice that <span class=mono>PID 1000</span> is no longer in the list, and <span class=mono>PID 1003</span> has taken its place):</p>
+<pre class=code>\
+$ ps -o pid,rss,%cpu,cmd -p $(pgrep -u $USER '^Q$|^swaag$')
+  PID    RSS  %CPU  CMD
+ 1001  55000  99.9  swaag
+ 1002  59000  99.9  swaag
+ 1003  57000  99.9  swaag
+ 1004    540   0.0  Q
+ 1005    540   0.0  Q
+ 1006    540   0.0  Q
+ ...
+ ...
+ 1097    540   0.0  Q
+ 1098    540   0.0  Q
+ 1099    540   0.0  Q
+</pre>
+    <p>This pattern continues until all <span class=progName>Q</span> processes have waited their turn and then converted themselves into <span class=progName>SWAAG</span> processes.</p>
   <h3>The <span class=mono>END</span> Phase:</h3>
-    <p>This is the point right before you type the above command and press <span class=mono>ENTER</span>.  At this point, no <span class=progName>Q</span> or <span class=progName>SWAAG</span> processes are running.</p>
+    <p>This phase represents the point in time when all Q processes have been converted, and have finished running.</p>
 </div>
 <div class=exampleContainer>
   <div class=exampleSidebar>
@@ -226,7 +276,7 @@ This enables you to achieve some interesting queuing structures:
   <li>Q is implemented in C, and depends only on the C standard library.</li>
   <li>Q uses Linux Record Locking for inter-process communication.  This method is very fast and it does not involve any filesystem activity, other than the one-time creation of a lockfile.</li>
   <li>Since Linux Record Locking is managed by the Linux Kernel, the queue is guaranteed to never get "stuck", even if processes crash, or sent un-handlable signals like SIGSTOP and SIGKILL.</li>
-  <li>On a 32-bit system, a Q process uses around 400kB of RSS memory (most of which is from the standard C library, and therefore shared).  On a 64-bit system, a Q process uses around 630kB.</li>
+  <li>On a 32-bit system, a Q process uses around 430kB of RSS memory (most of which is from the standard C library, and therefore shared).  On a 64-bit system, a Q process uses around 540kB.</li>
   <li>Q uses intelligent binary search algorithms, along with other optimizations, to achieve excellent scalability and low-resources usage.  It is able to manage more processes than the Linux Kernel is currently able to handle.  (i.e. Q will never be the performance bottleneck.)</li>
 </ul>
 

@@ -104,15 +104,11 @@ pre.code {
 span.mono {
     font-family: monospace;
 }
-span.progName {
-    font-family: monospace;
-    font-size: 115%;
-}
 
-h1 {
-    margin-top: 2em;
+table.autoSizer {
+    margin: 0;
 }
-
-p {
-    line-height: 1.6em;
+table.autoSizer td.autoSizer {
+    border: none;
+    padding: 0;
 }

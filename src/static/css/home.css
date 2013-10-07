@@ -1,6 +1,19 @@
+h1 {
+    margin-top: 2em;
+}
+
+p {
+    line-height: 1.6em;
+}
+
 div#content {
     padding-left: 3em;
     padding-right: 3em;
+}
+
+span.progName {
+    font-family: monospace;
+    font-size: 115%;
 }
 
 table.downloads th.cornerLabel {
@@ -42,10 +55,3 @@ div.imgContainerBlock div.imgTitle {
     font-weight: bold;
 }
 
-table.autoSizer {
-    margin: 0;
-}
-table.autoSizer td.autoSizer {
-    border: none;
-    padding: 0;
-}
