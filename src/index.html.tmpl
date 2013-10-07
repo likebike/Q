@@ -5,7 +5,7 @@
     latestURL = '/bin/%s'%(latest,)
 %>
 
-<h1><a href="b.html">What is Q?</a></h1>
+<h1>What is Q?</h1>
 <p>Q is a serverless, generic process queue specifically designed for running CGI and PHP at <a href="http://webfaction.com/">WebFaction</a>.</p>
 <p>Normally, CGI and PHP at WebFaction are great, except for one problem: there is no limit to the number of CGI workers that can get created.  So during a traffic spike, it is easy to exceed your account's RAM limits, resulting in all your processes getting killed.  FastCGI is often recommended as an alternative because it allows you to specify the number of worker processes that should be created.  Unfortunately, due to some problems with Apache's FastCGI module, many sites produce intermittent "500" errors, or stop responding altogether.  As a result, neither the CGI mode, nor the FastCGI mode is really acceptable for sites that need very high reliability.</p>
 <p>Q fixes this problem by only allowing a defined number of CGI workers to run concurrently.  Any additional requests that come in get queued and execute in FIFO order.  This enables you to easily control the maximum amount of RAM you use during traffic spikes.  This solution makes CGI a viable option again.</p>
@@ -81,7 +81,7 @@ HELP=1 ./Q.cgi
     </ul>
   </div>
   <h2>Example #1: Running <span class=mono>N</span> Processes at at Time</h2>
-  <p>Pretend that you have a program named <span class=progName>SWAAG</span>, which converts <a href="input.png">images</a> to <a href="output.txt">ASCII art</a>.  The generation of this ASCII art is very CPU-intensive, but not demanding in terms of RAM or Disk I/O.  <span class=progName>SWAAG</span> is single-threaded and synchronous, so it only uses one CPU core when it runs.  Also pretend that your computer has 4 CPU cores, but you only want to use 3 of them for ASCII art conversions.  (You need the other core for <strike>productivity</strike> YouTube.)  You have a directory with 100 images that you need to convert, named <span class=mono>image00.png</span> to <span class=mono>image99.png</span>.</p>
+  <p>Pretend that you have written a program named <span class=progName>SWAAG</span>, which converts <a href="input.png">images</a> to <a href="output.txt">ASCII art</a>.  The generation of this ASCII art is very CPU-intensive, but not demanding in terms of RAM or Disk I/O.  <span class=progName>SWAAG</span> is single-threaded and synchronous, so it only uses one CPU core when it runs.  Also pretend that your computer has 4 CPU cores, but you only want to use 3 of them for ASCII art conversions.  (You need the other core for <strike>productivity</strike> YouTube.)  You have a directory with 100 images that you need to convert, named <span class=mono>image00.png</span> to <span class=mono>image99.png</span>.</p>
   <p><span class=progName>Q</span> makes these kinds of tasks easy.  You would just need to type this <span class=progName>bash</span> command:</p>
 <pre class=code>\
 for image in image*.png; do
@@ -129,9 +129,10 @@ done
     <br/>
     <li>If <span class=mono>(CONCURRENCY &lt; position &lt;= (CONCURRENCY + MAX_Q))</span>:<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=mono>sleep</span> awhile and then check <span class=mono>position</span> again.</li>
     <br/>
-    <li>If <span class=mono>position &gt; (CONCURRENCY + MAX_Q))</span>:<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=mono>exit(-17)</span> without running the command.</li>
+    <li>If <span class=mono>(position &gt; (CONCURRENCY + MAX_Q))</span>:<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=mono>exit(-17)</span> without running the command.</li>
     <br/>
   </ul>
+  <h3>Compile-time Options:</h3>
   <p>As demonstrated, <span class=progName>Q</span> uses environment variables for configuration. These settings can also be defined at compile-time. Furthermore, if you define a setting this way, it cannot be overridden with an environment variable. This is by design - it allows administrators to hard-code values and be sure that they don't change.</p>
   <p>To hard-code a value, define them as macros at compile time via the <span class=mono>CFLAGS</span> <span class=mono>make</span> variable. For example, the following will hard-code <span class=mono>CONCURRENCY=1</span> and <span class=mono>MAX_Q=0</span>, and rename the resultant file to <span class=mono>run_single</span>, because that's what it does:</p>
 <pre class=code>
@@ -158,7 +159,7 @@ mv ./Q ./run_single
 
 <pre class=code>
 
-Q Version 1.1.0  --  a FIFO worker queue, capable of running multiple workers at once.
+Q Version 1.1.1  --  a FIFO worker queue, capable of running multiple workers at once.
 
 Typical usage:  COMMAND=/usr/bin/rsync  ./Q  [args...]
 
@@ -167,13 +168,14 @@ The args get passed directly to COMMAND.
 Environment Variables:
 
     COMMAND=path -- Required.  The path to the target executable.  Should usually be an absolute path.
-    Q_FILE=path -- Required.  The path to the Q queue state file.  More info below.
+    Q_FILE=path -- The path to the Q queue state file.  More info below.
     CONCURRENCY=num -- Controls the number of workers to run at once.  Default is 1.
     MAX_Q=num -- Controls the maximum queue size (# waiting to run).  Default is -1 (unlimited).
     AUTO_CREATE_DIRS -- Set to 0 to prevent the Q_FILE parent directories from being auto-created.
     VERBOSE -- Set to 1 to display verbose information.
     HELP -- Set to 1 to display this help message and then exit.
 
+By default, Q_FILE is set to ~/.tmp/Q/cmd_$(basename $COMMAND).Q, but you can change this.
 You can use the tilde (~) and environment variables ($VAR) in the Q_FILE.
 This enables you to achieve some interesting queuing structures:
 

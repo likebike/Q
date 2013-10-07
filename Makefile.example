@@ -1,6 +1,6 @@
 # Adjust this Makefile to suit your server and project requirements.
 
-MYROOT=${HOME}/tmp/q_site
+MYROOT=${HOME}
 
 # The MakoFW location:
 MAKOFW_DIR=${MYROOT}/makofw

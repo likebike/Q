@@ -7,9 +7,11 @@
 /.gitconfig
 /.kshrc
 /.lesshst
+/Makefile
 /.screenrc
 /.ssh/
 /.tmp/
+/.vim/
 /.viminfo
 /.vimrc
 /.zshrc
