@@ -38,7 +38,14 @@ div.exampleContainer {
 div.exampleSidebar {
     float: right;
     width: 25em;
+    padding: 1em;
+    margin-left: 1em;
+    border: 1px solid blue;
     background-color: #ff9;
+
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
 }
 
 div.imgContainer {

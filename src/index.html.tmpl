@@ -14,7 +14,7 @@
 <p>Installation consists of two pieces: downloading a Q binary, and then referencing the binary from your website's .htaccess file.</p>
 <ol>
   <li>
-    <p>In all of the below instructions, make the following name substitutaions:</p>
+    <p>In all of the below instructions, make the following name substitutions:</p>
     <ul>
       <li><span class=mono>APP</span> = Your Application Name, defined in the WebFaction Control Panel, and corresponding to a folder under <span class=mono>~/webapps/</span>.</li>
       <li><span class=mono>Q.cgi</span> = The actual filename that you download from the table below (probably <span class=mono>php54_normal.cgi</span>).</li>
@@ -40,7 +40,7 @@ chmod 755 Q.cgi
     SetHandler cgi-script
 &lt;/FilesMatch&gt;
 Action php-q /Q.cgi
-&lt;FilesMatch \.php$&gt;
+&lt;FilesMatch \.(?i:php)$&gt;
     SetHandler php-q
 &lt;/FilesMatch&gt;
 </pre>
@@ -70,6 +70,14 @@ HELP=1 ./Q.cgi
 </pre>
   </li>
 </ul>
+<h1>Performance &amp; Reliability</h1>
+<ul>
+  <li>Q is implemented in C, and depends only on the C standard library.  Because of this, it is easy to build on any Linux system.</li>
+  <li>Q uses Linux Record Locking for inter-process communication.  This method is very fast and it does not involve any filesystem activity, other than the one-time creation of a lockfile.</li>
+  <li>Since Linux Record Locking is managed by the Linux Kernel, the queue is guaranteed to never get "stuck", even if processes crash or are sent un-handleable signals like SIGSTOP and SIGKILL.</li>
+  <li>On a 32-bit system, a Q process uses around 430kB of RSS memory (most of which is from the standard C library, and therefore shared).  On a 64-bit system, a Q process uses around 540kB.</li>
+  <li>Q uses intelligent binary search algorithms, along with other optimizations, to achieve excellent scalability and low-resources usage.  It is able to manage more processes than the Linux Kernel is currently able to handle.  (In other words, Q will never be the performance bottleneck.)</li>
+</ul>
 <h1>How Q Works</h1>
 <div class=exampleContainer>
   <div class=exampleSidebar>
@@ -80,7 +88,7 @@ HELP=1 ./Q.cgi
       <li><span class=mono>CONCURRENCY</span> -- The number of processes to run simultaneously.</li>
     </ul>
   </div>
-  <h2>Example #1: Running <span class=mono>N</span> Processes at at Time</h2>
+  <h2>Example #1: Running <span class=mono>N</span> Processes at a Time</h2>
   <p>Pretend that you have written a program named <span class=progName>SWAAG</span>, which converts <a href="http://xkcd.com/979/">images</a> to <a href="xkcd_979.html">ASCII art</a>.  The generation of this ASCII art is very CPU-intensive, but not demanding in terms of RAM or Disk I/O.  <span class=progName>SWAAG</span> is single-threaded and synchronous, so it only uses one CPU core when it runs.  Also pretend that your computer has 4 CPU cores, but you only want to use 3 of them for ASCII art conversions.  (You need the other core for <strike>productivity</strike> YouTube.)  You have a directory with 100 images that you need to convert, named <span class=mono>image00.png</span> to <span class=mono>image99.png</span>.</p>
   <p><span class=progName>Q</span> makes these kinds of tasks easy.  You would just need to type this <span class=progName>bash</span> command:</p>
 <pre class=code>\
@@ -160,10 +168,10 @@ $ ps -o pid,rss,%cpu,cmd -p $(pgrep -u $USER '^Q$|^swaag$')
     <p>This example introduces how to use <span class=progName>Q</span> as a single-instance process manager. It is often necessary to ensure that only one instance of an automatic periodic task is ever running at any given time, and Q makes this easy.</p>
     <p>One  <span class=progName>Q</span> option is introduced:</p>
     <ul>
-      <li><span class=mono>MAX_Q</span> -- The number of processes which will wait for execution. Any process which would queue to a position over this limit instead exits immediately instead of queuing up. A value of <span class=mono>0</span> means that processes will never queue; they either execute immediately or exit immediately. A value of <span class=mono>-1</span> represents an unlimited queue size.</li>
+      <li><span class=mono>MAX_Q</span> -- The number of processes which will wait for execution. Any process which would queue to a position over this limit exits immediately instead of queuing up. A value of <span class=mono>0</span> means that processes will never queue; they either execute immediately or exit immediately. A value of <span class=mono>-1</span> represents an unlimited queue size.</li>
     </ul>
   </div>
-  <h2>Example #2: Running One Process at at Time</h2>
+  <h2>Example #2: Running One Process at a Time</h2>
   <p>Pretend that you have a production PostgreSQL database that your business depends on. Data changes often, so you need to take hourly backups. Most of the time, those backups complete within the hour. However, if the database server is particularly busy, it could take longer. You can't really know in advance the maximum length of time that any one export could take, and you don't want more than one of these database export processes running at once. If it happens that a previous export process is still running when the next starts, the new one should just exit immediately without running. You never want these processes to overlap.
   <p><span class=progName>Q</span> can also be used for this type of application. You would use an hourly cron job like this:</p>
 <pre class=code>\
@@ -235,10 +243,10 @@ mv ./Q ~/bin/run_single
 </div>
 <div class=exampleContainer>
   <div class=exampleSidebar>
-    <p>This example introduces how to use <span class=progName>Q</span> as a CGI request queue. This applies to any situation where you need to gracefully handle bursts of activity by queuing them into a queue and handling them as soon as resources are available, in the order in which they were received.</p>
+    <p>This example introduces how to use <span class=progName>Q</span> as a CGI request queue. This applies to any situation where you need to gracefully handle bursts of activity with a queue and handling them as soon as resources are available, in the order in which they were received.</p>
     <p>Two <span class=progName>Q</span> options are introduced:</p>
     <ul>
-      <li><span class=mono>Q_FILE</span> -- Path to the file to queue processes into. This allows you to have different parallel queues for different types of processes. For example, maybe you want the incoming CGI requests for different domains to queue separately, so a single domain which recieves a heavy traffic burst won't affect availability of other sites under your account.</li>
+      <li><span class=mono>Q_FILE</span> -- Path to the file to queue processes into. This allows you to have different parallel queues for different types of processes. For example, maybe you want the incoming CGI requests for different domains to queue separately, so a single domain which receives a heavy traffic burst won't affect availability of other sites under your account.</li>
       <li><span class=mono>AUTO_CREATE_DIRS</span> -- By default, <span class=progName>Q</span> automatically creates the parent directories of <span class=mono>Q_FILE</span> if they don't exist. Set <span class=mono>AUTO_CREATE_DIRS</span> to <span class=mono>0</span> to suppress this behavior.</li>
     </ul>
   </div>
@@ -255,14 +263,14 @@ mv ./Q ~/webapps/myapp/php54.cgi
     SetHandler cgi-script
 &lt;/FilesMatch&gt;
 Action php-q /php54.cgi
-&lt;FilesMatch \.php$&gt;
+&lt;FilesMatch \.(?i:php)$&gt;
     SetHandler php-q
 &lt;/FilesMatch&gt;
 </pre>
   <p>Then, when a PHP request comes in for this application, a <span class=progName>Q</span> process gets started <em>instead of</em> a normal <span class=mono>php54.cgi</span> process. The new <span class=progName>Q</span> process checks its <span class=mono>position</span> in the queue as described in the previous example. Once it's ready, it <span class=mono>exec</span>'s the <em>real</em> PHP binary.</p>
-  <p>Under normal circumstances, the new <span class=progName>Q</span> process doesn't need to wait and just executes immediately. During a traffic spike, however, the <span class=progName>Q</span> processes queue up. It's much better to queue up several <span class=progName>Q</span> processes (630k each) than many php54.cgi processes (48MB each). Furthermore, they will execute in FIFO order and will not overlap to the point of slowing each other down. As a result, this prevents traffic spikes from using large amounts of RAM and can even improve performance as well.</p>
-  <p>In addition to the above, <span class=progName>Q</span> also provides powerful queuing flexibility. Instead of having a single queue for all of your <span class=mono>php54.cgi</span> processes (the default), you can specify multiple queues using the <span class=mono>Q_FILE</span> setting. To understand how this works, revisit the above example in more detail. When a PHP request comes in for a particular domain, a new <span class=progName>Q</span> process gets started instead of a normal <span class=mono>php54.cgi</span> process. The new <span class=progName>Q</span> process checks its <span class=mono>position</span> in its associated <span class=mono>Q_FILE</span>, and either executes immediately, waits in line, or else exits immediately depending on how many other <span class=progName>Q</span> processes are waiting in that same <span class=mono>Q_FILE</span>.</p>
-  <p>By putting different different domains into different queues, you can separate traffic. Imagine that you are a developer and hosting clients' websites, each of which should receive comparible performance. If one of those sites gets significantly more traffic than the others, that site will bog down the other sites. Applying <span class=progName>Q</span> could solve this problem nicely by placing each website into its own separate queue with, perhaps, <span class=mono>CONCURRENCY=2</span> and <span class=mono>MAX_Q=20</span>. The relatively busy site will experience longer load times during traffic spikes (requests having to wait for their turn to execute) but other clients' sites would remain fast as long as their own <span class=mono>RUNNING</span> regions remained unsaturated..</p>
+  <p>Under normal circumstances, the new <span class=progName>Q</span> process doesn't need to wait and just executes immediately. During a traffic spike, however, the <span class=progName>Q</span> processes queue up. It's much better to queue up several <span class=progName>Q</span> processes (540kB each) than many php54.cgi processes (48MB each). Furthermore, they will execute in FIFO order and will not overlap to the point of slowing each other down. As a result, this prevents traffic spikes from using large amounts of RAM and can even improve performance as well.</p>
+  <p>In addition to the above, <span class=progName>Q</span> also provides powerful queuing flexibility. Instead of having a single queue for all of your <span class=mono>php54.cgi</span> processes (the default), you can specify different queues using the <span class=mono>Q_FILE</span> setting. To understand how this works, revisit the above example in more detail. When a PHP request comes in for a particular domain, a new <span class=progName>Q</span> process gets started instead of a normal <span class=mono>php54.cgi</span> process. The new <span class=progName>Q</span> process checks its <span class=mono>position</span> in its associated <span class=mono>Q_FILE</span>, and either executes immediately, waits in line, or else exits immediately depending on how many other <span class=progName>Q</span> processes are waiting in that same <span class=mono>Q_FILE</span>.</p>
+  <p>By putting different domains into different queues, you can separate traffic. Imagine that you are a developer and hosting clients' websites, each of which should receive comparable performance. If one of those sites gets significantly more traffic than the others, that site will bog down the other sites. Applying <span class=progName>Q</span> could solve this problem nicely by placing each website into its own separate queue with, perhaps, <span class=mono>CONCURRENCY=2</span> and <span class=mono>MAX_Q=20</span>. The relatively busy site will experience longer load times during traffic spikes (requests having to wait for their turn to execute) but other clients' sites would remain fast as long as their own <span class=mono>RUNNING</span> regions remained unsaturated..</p>
   <p>Accomplishing such separate queues is straightforward because environment variables can be used in the <span class=mono>Q_FILE</span> path. To do this, simply compile in a <span class=mono>Q_FILE</span> which uses the domain ("<span class=mono>$SERVER_NAME</span>") in its filename. This means multiple <span class=mono>Q_FILE</span>S (one for each domain) will exist, and requests for a particular domain will queue into its associated <span class=mono>Q_FILE</span>:</p>
 <pre class=code>
 CPPFLAGS="-DQ_FILE='~/.tmp/Q/cgi_$SERVER_NAME.Q' -DCONCURRENCY=3 -DMAX_Q=20 -DCOMMAND=/home/cgi-php/php54.cgi" make
@@ -272,6 +280,8 @@ mv ./Q ~/webapps/myapp/php54.cgi
 </div>
 
 
+<h1>Manpage</h1>
+<p>Here is <span class=progName>Q</span>'s standard help text, for your easy reference:</p>
 <pre class=code>
 
 Q Version 1.1.1  --  a FIFO worker queue, capable of running multiple workers at once.
@@ -300,14 +310,6 @@ This enables you to achieve some interesting queuing structures:
     Q_FILE='~/.tmp/Q/cgi_$SERVER_NAME.Q' # Assuming this is for CGI processes, use a per-domain queue.
 
 </pre>
-<h1>Performance &amp; Reliability</h1>
-<ul>
-  <li>Q is implemented in C, and depends only on the C standard library.</li>
-  <li>Q uses Linux Record Locking for inter-process communication.  This method is very fast and it does not involve any filesystem activity, other than the one-time creation of a lockfile.</li>
-  <li>Since Linux Record Locking is managed by the Linux Kernel, the queue is guaranteed to never get "stuck", even if processes crash, or sent un-handlable signals like SIGSTOP and SIGKILL.</li>
-  <li>On a 32-bit system, a Q process uses around 430kB of RSS memory (most of which is from the standard C library, and therefore shared).  On a 64-bit system, a Q process uses around 540kB.</li>
-  <li>Q uses intelligent binary search algorithms, along with other optimizations, to achieve excellent scalability and low-resources usage.  It is able to manage more processes than the Linux Kernel is currently able to handle.  (i.e. Q will never be the performance bottleneck.)</li>
-</ul>
 
 <%def name="DL_TABLE(title, basePath)">
     <table class=downloads>

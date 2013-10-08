@@ -99,6 +99,7 @@ div.asciiArt_white_small {
 pre.code {
     padding: .5em;
     background-color: #ddd;
+    clear: right;
 }
 
 span.mono {
