@@ -178,31 +178,59 @@ $ ps -o pid,rss,%cpu,cmd -p $(pgrep -u $USER '^Q$|^swaag$')
 0 * * * * CONCURRENCY=1 MAX_Q=0 COMMAND=/usr/bin/pg_dump ~/bin/Q -U mypguser -f ~/pg_backups/mydb.sql mydb
 </pre>
   <p>This will run <span class=progName>Q</span> each hour, instructing <span class=progName>Q</span> to run the command "<span class=mono>/usr/bin/pg_dump -U mypguser -f /home/myuser/pg_backups/mydb.sql mydb</span>" with <span class=mono>CONCURRENCY=1</span> and <span class=mono>MAX_Q=0</span>. This means that the <span class=progName>pg_dump</span> commands will execute one at a time (<span class=mono>CONCURRENCY=1</span>), and that processes never queue up, but instead exit immediately without running (<span class=mono>MAX_Q=0</span>).</p>
-  <p>To understand how this works, it's helpful to visualize the process array:</p>
+  <p>To understand how this works, it's helpful to visualize the process array. This visualization will assume <span class=mono>CONCURRENCY=3</span> and <span class=mono>MAX_Q=6</span> for increased demonstrative clarity:</p>
   <table class=autoSizer><tr class=autoSizer><td class=autoSizer>
     <div class="imgContainer">
       <div class=imgTitle>Structure Overview</div>
       <img src="${self.URL('/static/img/q_ex2_01_structure.png')}">
     </div>
+  </td>
+  <td class=autoSizer>
+    The process array has two primary regions; the <span class=mono>RUNNING</span> region and the <span class=mono>WAITING</span> region.<br/>
+    We are assuming <span class=mono>CONCURRENCY=3</span> and <span class=mono>MAX_Q=6</span>, so the process array has 3 <span class=mono>RUNNING</span> slots and 6 <span class=mono>WAITING</span> slots.<br/>
+    <br/>
+    Processes in the <span class=mono>WAITING</span> region are <span class=progName>Q</span> processes waiting their turn in line.<br/>
+    Processes in the <span class=mono>RUNNING</span> region are no longer <span class=progName>Q</span> processes, but have already been converted into the target <span class=mono>COMMAND</span>.
   </td></tr></table>
+  <br/>
   <table class=autoSizer><tr class=autoSizer><td class=autoSizer>
     <div class="imgContainer">
-      <div class=imgTitle>Adding a Process to the Queue</div>
+      <div class=imgTitle>A Process is added to the Queue</div>
       <img src="${self.URL('/static/img/q_ex2_02_adding.png')}">
     </div>
+  <td class=autoSizer>
+    In this image, we've initially populated the process array with some processes.<br/>
+    The first 3 processes (labeled <span class=mono>1</span>, <span class=mono>2</span>, and <span class=mono>3</span>) immediately went into the <span class=mono>RUNNING</span> region, since the array was initially empty.<br/>
+    The next 3 processes (labeled <span class=mono>4</span>, <span class=mono>5</span>, and <span class=mono>6</span>) went into the <span class=mono>WAITING</span> region, since the <span class=mono>RUNNING</span> region was already full.<br/>
+    This image illustrates the addition of another process, labeled <span class=mono>7</span>. As expected, it inserts itself at the end of the process array.<br/>
+    <br/>
+    The result is that there are now 7 total processes in the process array, with three <span class=mono>RUNNING</span> and four <span class=mono>WAITING</span>.
   </td></tr></table>
+  <br/>
   <table class=autoSizer><tr class=autoSizer><td class=autoSizer>
     <div class="imgContainer">
-      <div class=imgTitle>Removing a Process from the Queue</div>
+      <div class=imgTitle>A RUNNING process finishes, and<br/>the next WAITING process takes its place</div>
       <img src="${self.URL('/static/img/q_ex2_03_removing.png')}">
     </div>
+  <td class=autoSizer>
+    This image illustrates the completion of one of the <span class=mono>RUNNING</span> processes, in this case the process labeled <span class=mono>1</span>.<br/>
+    The next-in-line process in the <span class=mono>WAITING</span> region moves to take its place, in this case the process labeled <span class=mono>4</span>. All processes move forward.<br/>
+    <br/>
+    The result is that <span class=progName>Q</span> process <span class=mono>4</span> has now converted into its associated <span class=mono>COMMAND</span>.<br/>
+    Processes <span class=mono>2</span> and <span class=mono>3</span> are still running (they haven't completed yet), and three process (<span class=mono>5</span>, <span class=mono>6</span>, and <span class=mono>7</span>) are left <span class=mono>WAITING</span>.
   </td></tr></table>
+  <br/>
   <table class=autoSizer><tr class=autoSizer><td class=autoSizer>
     <div class="imgContainer">
-      <div class=imgTitle>Discarding Processes when Queue is Full</div>
+      <div class=imgTitle>A process is discarded when Queue is full</div>
       <img src="${self.URL('/static/img/q_ex2_04_full.png')}">
     </div>
+  <td class=autoSizer>
+    This image illustrates when the queue is completely full, any new <span class=progName>Q</span> processes exit immediately without ever running their <span class=mono>COMMAND</span>.<br/>
+    <br/>
+    The result is that no more processes than <span class=mono>MAX_Q</span> are ever queued up <span class=mono>WAITING</span>.
   </td></tr></table>
+  <br/>
   <p>The <span class=progName>Q</span> process array has two regions, the <span class=mono>RUNNING</span> region and the <span class=mono>WAITING</span> region. When a new <span class=progName>Q</span> process is launched, it inserts itself at the end of the array.</p>
   <ul>
     <li>If it lands in one of the first few spots, in the <span class=mono>RUNNING</span> region, then <span class=progName>Q</span> immediately executes the command.</li>
