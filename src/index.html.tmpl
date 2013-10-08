@@ -76,7 +76,7 @@ HELP=1 ./Q.cgi
   <li>Q uses Linux Record Locking for inter-process communication.  This method is very fast and it does not involve any filesystem activity, other than the one-time creation of a lockfile.</li>
   <li>Since Linux Record Locking is managed by the Linux Kernel, the queue is guaranteed to never get "stuck", even if processes crash or are sent un-handleable signals like SIGSTOP and SIGKILL.</li>
   <li>On a 32-bit system, a Q process uses around 430kB of RSS memory (most of which is from the standard C library, and therefore shared).  On a 64-bit system, a Q process uses around 540kB.</li>
-  <li>Q uses intelligent binary search algorithms, along with other optimizations, to achieve excellent scalability and low-resources usage.  It is able to manage more processes than the Linux Kernel is currently able to handle.  (In other words, Q will never be the performance bottleneck.)</li>
+  <li>Q uses intelligent binary search algorithms, along with other optimizations, to achieve excellent scalability and low resource usage.  It is able to manage more processes than the Linux Kernel is currently able to handle.  (In other words, Q will never be the performance bottleneck.)</li>
 </ul>
 <h1>How Q Works</h1>
 <div class=exampleContainer>
