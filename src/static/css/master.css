@@ -96,6 +96,9 @@ div.asciiArt_white_small {
 }
 
 
+p.codeIntro {
+    clear: right;
+}
 pre.code {
     padding: .5em;
     background-color: #ddd;
@@ -113,3 +116,8 @@ table.autoSizer td.autoSizer {
     border: none;
     padding: 0;
 }
+
+p.singlespace {
+    margin-bottom: 0;
+}
+

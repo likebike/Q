@@ -55,10 +55,22 @@ div.imgContainer {
 div.imgContainer.padRight {
     margin-right: 2em;
 }
-div.imgContainer div.imgTitle,
-div.imgContainerBlock div.imgTitle {
+div.imgTitle {
     text-align: center;
     font-size: 127%;
     font-weight: bold;
 }
 
+
+table.illustrations {
+}
+table.illustrations td.illustrations {
+    border: none;
+}
+table.illustrations td.image {
+    padding-bottom: 3em;
+}
+table.illustrations td.description {
+    vertical-align: top;
+    padding-top: 3em;
+}

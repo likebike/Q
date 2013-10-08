@@ -90,10 +90,10 @@ HELP=1 ./Q.cgi
   </div>
   <h2>Example #1: Running <span class=mono>N</span> Processes at a Time</h2>
   <p>Pretend that you have written a program named <span class=progName>SWAAG</span>, which converts <a href="http://xkcd.com/979/">images</a> to <a href="xkcd_979.html">ASCII art</a>.  The generation of this ASCII art is very CPU-intensive, but not demanding in terms of RAM or Disk I/O.  <span class=progName>SWAAG</span> is single-threaded and synchronous, so it only uses one CPU core when it runs.  Also pretend that your computer has 4 CPU cores, but you only want to use 3 of them for ASCII art conversions.  (You need the other core for <strike>productivity</strike> YouTube.)  You have a directory with 100 images that you need to convert, named <span class=mono>image00.png</span> to <span class=mono>image99.png</span>.</p>
-  <p><span class=progName>Q</span> makes these kinds of tasks easy.  You would just need to type this <span class=progName>bash</span> command:</p>
+  <p class=codeIntro><span class=progName>Q</span> makes these kinds of tasks easy.  You would just need to type this <span class=progName>bash</span> command:</p>
 <pre class=code>\
 for image in image*.png; do
-    COMMAND=swaag CONCURRENCY=3 ./Q "$image" 
+    COMMAND=swaag CONCURRENCY=3 ./Q "$image" &amp;
 done
 <!-- COMMAND=swaag CONCURRENCY=3 ./Q -m ascii_ext -s putty-CourierNew-8 sandwich2.png -->
 </pre>
@@ -173,64 +173,61 @@ $ ps -o pid,rss,%cpu,cmd -p $(pgrep -u $USER '^Q$|^swaag$')
   </div>
   <h2>Example #2: Running One Process at a Time</h2>
   <p>Pretend that you have a production PostgreSQL database that your business depends on. Data changes often, so you need to take hourly backups. Most of the time, those backups complete within the hour. However, if the database server is particularly busy, it could take longer. You can't really know in advance the maximum length of time that any one export could take, and you don't want more than one of these database export processes running at once. If it happens that a previous export process is still running when the next starts, the new one should just exit immediately without running. You never want these processes to overlap.
-  <p><span class=progName>Q</span> can also be used for this type of application. You would use an hourly cron job like this:</p>
+  <p class=codeIntro><span class=progName>Q</span> can also be used for this type of application. You would use an hourly cron job like this:</p>
 <pre class=code>\
 0 * * * * CONCURRENCY=1 MAX_Q=0 COMMAND=/usr/bin/pg_dump ~/bin/Q -U mypguser -f ~/pg_backups/mydb.sql mydb
 </pre>
   <p>This will run <span class=progName>Q</span> each hour, instructing <span class=progName>Q</span> to run the command "<span class=mono>/usr/bin/pg_dump -U mypguser -f /home/myuser/pg_backups/mydb.sql mydb</span>" with <span class=mono>CONCURRENCY=1</span> and <span class=mono>MAX_Q=0</span>. This means that the <span class=progName>pg_dump</span> commands will execute one at a time (<span class=mono>CONCURRENCY=1</span>), and that processes never queue up, but instead exit immediately without running (<span class=mono>MAX_Q=0</span>).</p>
   <p>To understand how this works, it's helpful to visualize the process array. This visualization will assume <span class=mono>CONCURRENCY=3</span> and <span class=mono>MAX_Q=6</span> for increased demonstrative clarity:</p>
-  <table class=autoSizer><tr class=autoSizer><td class=autoSizer>
-    <div class="imgContainer">
-      <div class=imgTitle>Structure Overview</div>
-      <img src="${self.URL('/static/img/q_ex2_01_structure.png')}">
-    </div>
-  </td>
-  <td class=autoSizer>
-    The process array has two primary regions; the <span class=mono>RUNNING</span> region and the <span class=mono>WAITING</span> region.<br/>
-    We are assuming <span class=mono>CONCURRENCY=3</span> and <span class=mono>MAX_Q=6</span>, so the process array has 3 <span class=mono>RUNNING</span> slots and 6 <span class=mono>WAITING</span> slots.<br/>
-    <br/>
-    Processes in the <span class=mono>WAITING</span> region are <span class=progName>Q</span> processes waiting their turn in line.<br/>
-    Processes in the <span class=mono>RUNNING</span> region are no longer <span class=progName>Q</span> processes, but have already been converted into the target <span class=mono>COMMAND</span>.
-  </td></tr></table>
-  <br/>
-  <table class=autoSizer><tr class=autoSizer><td class=autoSizer>
-    <div class="imgContainer">
-      <div class=imgTitle>A Process is added to the Queue</div>
-      <img src="${self.URL('/static/img/q_ex2_02_adding.png')}">
-    </div>
-  <td class=autoSizer>
-    In this image, we've initially populated the process array with some processes.<br/>
-    The first 3 processes (labeled <span class=mono>1</span>, <span class=mono>2</span>, and <span class=mono>3</span>) immediately went into the <span class=mono>RUNNING</span> region, since the array was initially empty.<br/>
-    The next 3 processes (labeled <span class=mono>4</span>, <span class=mono>5</span>, and <span class=mono>6</span>) went into the <span class=mono>WAITING</span> region, since the <span class=mono>RUNNING</span> region was already full.<br/>
-    This image illustrates the addition of another process, labeled <span class=mono>7</span>. As expected, it inserts itself at the end of the process array.<br/>
-    <br/>
-    The result is that there are now 7 total processes in the process array, with three <span class=mono>RUNNING</span> and four <span class=mono>WAITING</span>.
-  </td></tr></table>
-  <br/>
-  <table class=autoSizer><tr class=autoSizer><td class=autoSizer>
-    <div class="imgContainer">
-      <div class=imgTitle>A RUNNING process finishes, and<br/>the next WAITING process takes its place</div>
-      <img src="${self.URL('/static/img/q_ex2_03_removing.png')}">
-    </div>
-  <td class=autoSizer>
-    This image illustrates the completion of one of the <span class=mono>RUNNING</span> processes, in this case the process labeled <span class=mono>1</span>.<br/>
-    The next-in-line process in the <span class=mono>WAITING</span> region moves to take its place, in this case the process labeled <span class=mono>4</span>. All processes move forward.<br/>
-    <br/>
-    The result is that <span class=progName>Q</span> process <span class=mono>4</span> has now converted into its associated <span class=mono>COMMAND</span>.<br/>
-    Processes <span class=mono>2</span> and <span class=mono>3</span> are still running (they haven't completed yet), and three process (<span class=mono>5</span>, <span class=mono>6</span>, and <span class=mono>7</span>) are left <span class=mono>WAITING</span>.
-  </td></tr></table>
-  <br/>
-  <table class=autoSizer><tr class=autoSizer><td class=autoSizer>
-    <div class="imgContainer">
-      <div class=imgTitle>A process is discarded when Queue is full</div>
-      <img src="${self.URL('/static/img/q_ex2_04_full.png')}">
-    </div>
-  <td class=autoSizer>
-    This image illustrates when the queue is completely full, any new <span class=progName>Q</span> processes exit immediately without ever running their <span class=mono>COMMAND</span>.<br/>
-    <br/>
-    The result is that no more processes than <span class=mono>MAX_Q</span> are ever queued up <span class=mono>WAITING</span>.
-  </td></tr></table>
-  <br/>
+  <table class=illustrations>
+    <tr class=illustrations>
+      <td class="illustrations image">
+        <div class=imgTitle>Structure Overview</div>
+        <img src="${self.URL('/static/img/q_ex2_01_structure.png')}">
+      </td>
+      <td class="illustrations description">
+        <p class=singlespace>The process array has two primary regions; the <span class=mono>RUNNING</span> region and the <span class=mono>WAITING</span> region.</p>
+        <p>We are assuming <span class=mono>CONCURRENCY=3</span> and <span class=mono>MAX_Q=6</span>, so the process array has 3 <span class=mono>RUNNING</span> slots and 6 <span class=mono>WAITING</span> slots.</p>
+        <p class=singlespace>Processes in the <span class=mono>WAITING</span> region are <span class=progName>Q</span> processes waiting their turn in line.</p>
+        <p class=singlespace>Processes in the <span class=mono>RUNNING</span> region are no longer <span class=progName>Q</span> processes, but have already been converted into the target <span class=mono>COMMAND</span>.</p>
+      </td>
+    </tr>
+    <tr class=illustrations>
+      <td class="illustrations image">
+        <div class=imgTitle>A Process is added to the Queue</div>
+        <img src="${self.URL('/static/img/q_ex2_02_adding.png')}">
+      </td>
+      <td class="illustrations description">
+        <p class=singlespace>In this image, we've initially populated the process array with some processes.</p>
+        <p class=singlespace>The first 3 processes (labeled <span class=mono>1</span>, <span class=mono>2</span>, and <span class=mono>3</span>) immediately went into the <span class=mono>RUNNING</span> region, since the array was initially empty.</p>
+        <p class=singlespace>The next 3 processes (labeled <span class=mono>4</span>, <span class=mono>5</span>, and <span class=mono>6</span>) went into the <span class=mono>WAITING</span> region, since the <span class=mono>RUNNING</span> region was already full.</p>
+        <p>This image illustrates the addition of another process, labeled <span class=mono>7</span>. As expected, it inserts itself at the end of the process array.</p>
+        <p>The result is that there are now 7 total processes in the process array, with three <span class=mono>RUNNING</span> and four <span class=mono>WAITING</span>.</p>
+      </td>
+    </tr>
+    <tr class=illustrations>
+      <td class="illustrations image">
+        <div class=imgTitle>A RUNNING process finishes, and<br/>the next WAITING process takes its place</div>
+        <img src="${self.URL('/static/img/q_ex2_03_removing.png')}">
+      </td>
+      <td class="illustrations description">
+        <p class=singlespace>This image illustrates the completion of one of the <span class=mono>RUNNING</span> processes, in this case the process labeled <span class=mono>1</span>.</p>
+        <p>The next-in-line process in the <span class=mono>WAITING</span> region moves to take its place, in this case the process labeled <span class=mono>4</span>. All processes move forward.</p>
+        <p class=singlespace>The result is that <span class=progName>Q</span> process <span class=mono>4</span> has now been converted into its associated <span class=mono>COMMAND</span>.</p>
+        <p>Processes <span class=mono>2</span> and <span class=mono>3</span> are still running (they haven't completed yet), and three process (<span class=mono>5</span>, <span class=mono>6</span>, and <span class=mono>7</span>) are left <span class=mono>WAITING</span>.</p>
+      </td>
+    </tr>
+    <tr class=illustrations>
+      <td class="illustrations image">
+        <div class=imgTitle>A process is discarded when Queue is full</div>
+        <img src="${self.URL('/static/img/q_ex2_04_full.png')}">
+      </td>
+      <td class="illustrations description">
+        <p>This image illustrates that when the queue is completely full, any new <span class=progName>Q</span> processes exit immediately without ever running their <span class=mono>COMMAND</span>.</p>
+        <p>The result is that no more processes than <span class=mono>MAX_Q</span> are ever queued up <span class=mono>WAITING</span>.</p>
+      </td>
+    </tr>
+  </table>
   <p>The <span class=progName>Q</span> process array has two regions, the <span class=mono>RUNNING</span> region and the <span class=mono>WAITING</span> region. When a new <span class=progName>Q</span> process is launched, it inserts itself at the end of the array.</p>
   <ul>
     <li>If it lands in one of the first few spots, in the <span class=mono>RUNNING</span> region, then <span class=progName>Q</span> immediately executes the command.</li>
@@ -280,7 +277,7 @@ mv ./Q ~/bin/run_single
   </div>
   <h2>Example #3: Running N processes at a time, allowing only M to be queued at once</h2>
   <p>Imagine that you are running a PHP 5.4 website in CGI mode. You want to handle 3 concurrent requests, but you also can't afford to queue unlimited numbers of requests because Apache processes are very heavy. You would like to limit the queue length to 20.</p>
-  <p>For this situation, it makes a lot of sense to create a compiled drop-in replacement for the PHP binary:</p>
+  <p class=codeIntro>For this situation, it makes a lot of sense to create a compiled drop-in replacement for the PHP binary:</p>
 <pre class=code>
 CPPFLAGS="-DCONCURRENCY=3 -DMAX_Q=20 -DCOMMAND=/home/cgi-php/php54.cgi" make
 mv ./Q ~/webapps/myapp/php54.cgi
@@ -299,7 +296,7 @@ Action php-q /php54.cgi
   <p>Under normal circumstances, the new <span class=progName>Q</span> process doesn't need to wait and just executes immediately. During a traffic spike, however, the <span class=progName>Q</span> processes queue up. It's much better to queue up several <span class=progName>Q</span> processes (540kB each) than many php54.cgi processes (48MB each). Furthermore, they will execute in FIFO order and will not overlap to the point of slowing each other down. As a result, this prevents traffic spikes from using large amounts of RAM and can even improve performance as well.</p>
   <p>In addition to the above, <span class=progName>Q</span> also provides powerful queuing flexibility. Instead of having a single queue for all of your <span class=mono>php54.cgi</span> processes (the default), you can specify different queues using the <span class=mono>Q_FILE</span> setting. To understand how this works, revisit the above example in more detail. When a PHP request comes in for a particular domain, a new <span class=progName>Q</span> process gets started instead of a normal <span class=mono>php54.cgi</span> process. The new <span class=progName>Q</span> process checks its <span class=mono>position</span> in its associated <span class=mono>Q_FILE</span>, and either executes immediately, waits in line, or else exits immediately depending on how many other <span class=progName>Q</span> processes are waiting in that same <span class=mono>Q_FILE</span>.</p>
   <p>By putting different domains into different queues, you can separate traffic. Imagine that you are a developer and hosting clients' websites, each of which should receive comparable performance. If one of those sites gets significantly more traffic than the others, that site will bog down the other sites. Applying <span class=progName>Q</span> could solve this problem nicely by placing each website into its own separate queue with, perhaps, <span class=mono>CONCURRENCY=2</span> and <span class=mono>MAX_Q=20</span>. The relatively busy site will experience longer load times during traffic spikes (requests having to wait for their turn to execute) but other clients' sites would remain fast as long as their own <span class=mono>RUNNING</span> regions remained unsaturated..</p>
-  <p>Accomplishing such separate queues is straightforward because environment variables can be used in the <span class=mono>Q_FILE</span> path. To do this, simply compile in a <span class=mono>Q_FILE</span> which uses the domain ("<span class=mono>$SERVER_NAME</span>") in its filename. This means multiple <span class=mono>Q_FILE</span>S (one for each domain) will exist, and requests for a particular domain will queue into its associated <span class=mono>Q_FILE</span>:</p>
+  <p>Accomplishing such separate queues is straightforward because environment variables can be used in the <span class=mono>Q_FILE</span> path. To do this, simply compile in a <span class=mono>Q_FILE</span> which uses the domain ("<span class=mono>$SERVER_NAME</span>" -- a standard CGI environment variable) in its filename. This means multiple <span class=mono>Q_FILE</span>s (one for each domain) will exist, and requests for a particular domain will queue into its associated <span class=mono>Q_FILE</span>:</p>
 <pre class=code>
 CPPFLAGS="-DQ_FILE='~/.tmp/Q/cgi_$SERVER_NAME.Q' -DCONCURRENCY=3 -DMAX_Q=20 -DCOMMAND=/home/cgi-php/php54.cgi" make
 mv ./Q ~/webapps/myapp/php54.cgi
