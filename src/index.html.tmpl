@@ -246,7 +246,7 @@ $ ps -o pid,rss,%cpu,cmd -p $(pgrep -u $USER '^Q$|^swaag$')
   </ul>
   <h3>Compile-time Options:</h3>
   <p>As demonstrated, <span class=progName>Q</span> uses environment variables for configuration. These settings can also be defined at compile-time. Furthermore, if you define a setting this way, it cannot be overridden with an environment variable. This is by design - it allows administrators to hard-code values and be sure that they don't change.</p>
-  <p>To hard-code a value, define them as macros at compile time via the <span class=mono>CFLAGS</span> <span class=mono>make</span> variable. For example, the following will hard-code <span class=mono>CONCURRENCY=1</span> and <span class=mono>MAX_Q=0</span>, and rename the resultant file to <span class=mono>run_single</span>, because that's what it does:</p>
+  <p>To hard-code a value, define them as macros at compile time via the <span class=mono>CFLAGS</span> <span class=mono>make</span> variable. For example, the following will hard-code <span class=mono>CONCURRENCY=1</span> and <span class=mono>MAX_Q=0</span>, and rename the resulting file to <span class=mono>run_single</span>, because that's what it does:</p>
 <pre class=code>
 CPPFLAGS="-DCONCURRENCY=1 -DMAX_Q=0" make
 mv ./Q ~/bin/run_single
