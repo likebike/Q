@@ -1,5 +1,3 @@
 # Q
-A Process Queue
-
-See the website: q.likebike.org
+A Process Queue: http://q.likebike.org/
 
