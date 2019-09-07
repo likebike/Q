@@ -1,6 +1,6 @@
 # Q
 
-A Process Queue.  See the website for a full description: http://q.likebike.org/
+A Process Queue.  See the website for a full description: http://q.likebike.com/
 
 ## Manpage
 
