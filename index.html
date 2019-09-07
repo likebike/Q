@@ -7,16 +7,16 @@
     <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="/favicon.ico">
     <title>Q Process Queue</title>
     <link rel="stylesheet" type="text/css" href="/static/lib/yui-3.12.0/reset_base_fonts-min.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/master.css?timestamp=1381204919.74">
+    <link rel="stylesheet" type="text/css" href="/static/css/master.css?timestamp=1381204919.0">
     
-    <link rel="stylesheet" type="text/css" href="/static/css/home.css?timestamp=1381206033.67">
+    <link rel="stylesheet" type="text/css" href="/static/css/home.css?timestamp=1381206033.0">
 
     <script type="text/javascript" src="/static/lib/jquery-1.10.2/jquery.js"></script>
     <script type="text/javascript" src="/static/lib/underscore-1.5.2/underscore.js"></script>
     <script type="text/javascript">
       jQuery.noConflict();
     </script>
-    <script type="text/javascript" src="/static/js/master.js?timestamp=1380667965.4"></script>
+    <script type="text/javascript" src="/static/js/master.js?timestamp=1380667965.0"></script>
     
   </head>
   <body class="roundedTop roundedBottom">
@@ -91,7 +91,7 @@ chmod 755 Q.cgi
       <tr><th class=leftLabel>Large Account<br><span class=labelDesc>(If you have a 1GB/2GB/4GB plan)</span></td><td><a href="/bin/centos5/php52_large.cgi">php52_large.cgi</a></td><td><a href="/bin/centos5/php53_large.cgi">php53_large.cgi</a></td><td><a href="/bin/centos5/php54_large.cgi">php54_large.cgi</a></td></tr>
     </table>
 
-    <p>Here is a link to the <a href="/bin/Q-1.1.1.tar.gz">latest source code</a>.  You can also browse the <a href="/bin">distribution mirror</a>.</p>
+    <p>Here is a link to the <a href="/bin/Q-1.1.1.tar.gz">latest source code</a>.  You can also browse the <a href="https://github.com/likebike/Q/tree/gh-pages/bin">distribution mirror</a>.</p>
   </li>
 
   <li>
@@ -160,11 +160,11 @@ done
   <p>Here are some graphical views of the execution (click to enlarge):</p>
   <div class="imgContainer padRight">
     <div class=imgTitle>Execution Status, Per-Image View</div>
-    <a href="/static/img/q_ex1_image_view_1024.png?timestamp=1381140845.48"><img src="/static/img/q_ex1_image_view_500.png?timestamp=1381140844.34"></a>
+    <a href="/static/img/q_ex1_image_view_1024.png?timestamp=1381140845.0"><img src="/static/img/q_ex1_image_view_500.png?timestamp=1381140844.0"></a>
   </div>
   <div class=imgContainer>
     <div class=imgTitle>Execution Status, System View</div>
-    <a href="/static/img/q_ex1_system_view_1024.png?timestamp=1381113688.44"><img src="/static/img/q_ex1_system_view_500.png?timestamp=1381113720.17"></a>
+    <a href="/static/img/q_ex1_system_view_1024.png?timestamp=1381113688.0"><img src="/static/img/q_ex1_system_view_500.png?timestamp=1381113720.0"></a>
   </div>
   <p>There are several phases of execution, as shown in the diagrams above:</p>
   <h3>The <span class=mono>START</span> Phase:</h3>
@@ -239,7 +239,7 @@ done
     <tr class=illustrations>
       <td class="illustrations image">
         <div class=imgTitle>Structure Overview</div>
-        <img src="/static/img/q_ex2_01_structure.png?timestamp=1381139433.77">
+        <img src="/static/img/q_ex2_01_structure.png?timestamp=1381139433.0">
       </td>
       <td class="illustrations description">
         <p class=singlespace>The process array has two primary regions; the <span class=mono>RUNNING</span> region and the <span class=mono>WAITING</span> region.</p>
@@ -251,7 +251,7 @@ done
     <tr class=illustrations>
       <td class="illustrations image">
         <div class=imgTitle>A Process is added to the Queue</div>
-        <img src="/static/img/q_ex2_02_adding.png?timestamp=1381139433.15">
+        <img src="/static/img/q_ex2_02_adding.png?timestamp=1381139433.0">
       </td>
       <td class="illustrations description">
         <p class=singlespace>In this image, we've initially populated the process array with some processes.</p>
@@ -264,7 +264,7 @@ done
     <tr class=illustrations>
       <td class="illustrations image">
         <div class=imgTitle>A RUNNING process finishes, and<br/>the next WAITING process takes its place</div>
-        <img src="/static/img/q_ex2_03_removing.png?timestamp=1381139434.91">
+        <img src="/static/img/q_ex2_03_removing.png?timestamp=1381139434.0">
       </td>
       <td class="illustrations description">
         <p class=singlespace>This image illustrates the completion of one of the <span class=mono>RUNNING</span> processes, in this case the process labeled <span class=mono>1</span>.</p>
@@ -276,7 +276,7 @@ done
     <tr class=illustrations>
       <td class="illustrations image">
         <div class=imgTitle>A process is discarded when Queue is full</div>
-        <img src="/static/img/q_ex2_04_full.png?timestamp=1381139436.44">
+        <img src="/static/img/q_ex2_04_full.png?timestamp=1381139436.0">
       </td>
       <td class="illustrations description">
         <p>This image illustrates that when the queue is completely full, any new <span class=progName>Q</span> processes exit immediately without ever running their <span class=mono>COMMAND</span>.</p>
@@ -396,7 +396,7 @@ This enables you to achieve some interesting queuing structures:
 
     </div>
     <div id=footer>
-      <!-- Last Site Update: 2013-11-12 -->
+      <!-- Last Site Update: 2019-09-07 -->
       <div id=hostedBy><a href="http://webfaction.com/">Hosted by</a></div>
 <div id=wfLogo class="asciiArt roundedBottom">                 ____
             _„m®ÑÑÑÑÑÑ®mç_               _çm®®ÑÑ®®mç_
