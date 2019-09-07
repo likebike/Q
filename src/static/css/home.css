@@ -1,0 +1,76 @@
+h1 {
+    margin-top: 2em;
+}
+
+p {
+    line-height: 1.6em;
+}
+
+div#content {
+    padding-left: 3em;
+    padding-right: 3em;
+}
+
+span.progName {
+    font-family: monospace;
+    font-size: 115%;
+}
+
+table.downloads th.cornerLabel {
+    color: #ddd;
+    background-color: #444;
+    font-size: 127%;
+}
+table.downloads th.topLabel,
+table.downloads th.leftLabel {
+    background-color: #d8d8d8;
+}
+table.downloads th.leftLabel span.labelDesc {
+    font-size: 85%;
+}
+table.downloads td {
+    text-align: center;
+}
+
+div.exampleContainer {
+    position: relative;
+}
+div.exampleSidebar {
+    float: right;
+    width: 25em;
+    padding: 1em;
+    margin-left: 1em;
+    border: 1px solid blue;
+    background-color: #ff9;
+
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+}
+
+div.imgContainer {
+    display: inline-block;
+    margin-bottom: 2em;
+}
+div.imgContainer.padRight {
+    margin-right: 2em;
+}
+div.imgTitle {
+    text-align: center;
+    font-size: 127%;
+    font-weight: bold;
+}
+
+
+table.illustrations {
+}
+table.illustrations td.illustrations {
+    border: none;
+}
+table.illustrations td.image {
+    padding-bottom: 3em;
+}
+table.illustrations td.description {
+    vertical-align: top;
+    padding-top: 3em;
+}

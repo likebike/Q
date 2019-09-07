@@ -1,0 +1,15 @@
+git clone likebike@git.likebike.org:repo/q_site
+cd q_site
+git clone http://git.likebike.org/makofw.git
+
+edit Makefile, set root directory:
+    MYROOT=${HOME}/tmp/q_site
+    ... etc
+
+make
+
+cd www/dev
+python -m'SimpleHTTPServer'
+
+curl http://127.0.0.1:8000/
+

@@ -1,0 +1,26 @@
+# This .htaccess file provides a convenient way to serve Development and Production sites from the same www root.
+# Note that this is not a requirement to use the makofw framework.  For example, if you're serving a "pure" static
+# site from Nginx, then just tell Nginx to serve directly from the 'www/dev' and/or 'www/prod' directories rather than
+# the 'www' root.
+
+# # Disable directory listings:
+# Options -Indexes
+
+RewriteEngine on
+RewriteBase /
+
+# Redirect www.domain.com to domain.com:
+RewriteCond %{HTTP_HOST} ^www\.(.*) [NC]
+RewriteRule (.*) http://%1/$1 [R,L]
+
+# Rewrite dev.domain.com to the dev directory:
+RewriteCond %{HTTP_HOST} ^dev\.(.*) [NC]
+RewriteCond %{REQUEST_URI} !^/dev/.*
+RewriteRule (.*) /dev/$1 [L]
+
+# Rewrite all other requests to the prod directory:
+RewriteCond %{HTTP_HOST} !^dev\.(.*) [NC]
+RewriteCond %{REQUEST_URI} !^/prod/.*
+RewriteRule (.*) /prod/$1 [L]
+
+

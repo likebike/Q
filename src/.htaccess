@@ -1,0 +1,8 @@
+# By default, tell browsers to NOT cache our stuff at all!
+# This is mostly for Internet Explorer, which uses an overly-aggressive
+# cache, and fails to fetch our important data.
+
+<IfModule mod_headers.c>
+    Header set Expires "Sun, 28 Jan 2007 00:00:00 GMT"
+    Header set Pragma "no-cache"
+</IfModule>
