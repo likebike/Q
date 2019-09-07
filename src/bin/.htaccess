@@ -1,9 +1,0 @@
-# Kept for reference:
-# <FilesMatch "\.(mov|mp3|jpg|pdf|mp4|avi|wmv)$">
-
-# I use .+ instead of .* so that dir listings are not served as downloads:
-<FilesMatch "^.+$">
-    ForceType applicaton/octet-stream
-    Header set Content-Disposition attachment
-</FilesMatch>
-
